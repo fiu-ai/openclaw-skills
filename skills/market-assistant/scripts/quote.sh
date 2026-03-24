@@ -37,13 +37,19 @@ if [ -z "$TOKEN" ]; then
     exit 1
 fi
 
-# 调用 API
+# 调用 API (JSON-RPC 2.0 格式)
 curl -s -X POST "$ENDPOINT" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
+    -H "Accept: application/json, text/event-stream" \
     -d "{
-        \"tool\": \"quote\",
+        \"jsonrpc\": \"2.0\",
+        \"id\": 1,
+        \"method\": \"tools/call\",
         \"params\": {
-            \"symbol\": \"$SYMBOL\"
+            \"name\": \"quote\",
+            \"arguments\": {
+                \"symbol\": \"$SYMBOL\"
+            }
         }
-    }" | jq .
+    }" | grep "^data:" | sed 's/^data: //' | jq .
