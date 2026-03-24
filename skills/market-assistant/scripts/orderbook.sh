@@ -18,12 +18,27 @@ if [ -z "$TOKEN" ]; then
     exit 1
 fi
 
-curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
+RESPONSE=$(curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
+    -H "Accept: application/json, text/event-stream" \
     -d "{
-        \"tool\": \"orderbook\",
+        \"jsonrpc\": \"2.0\",
+        \"id\": 1,
+        \"method\": \"tools/call\",
         \"params\": {
-            \"symbol\": \"$SYMBOL\"
+            \"name\": \"post_v3_order_latest\",
+            \"arguments\": {
+                \"symbol\": \"$SYMBOL\"
+            }
         }
-    }" | jq .
+    }")
+
+DATA=$(echo "$RESPONSE" | grep "^data:" | sed 's/^data: //')
+TEXT=$(echo "$DATA" | jq -r '.result.content[0].text' 2>/dev/null)
+
+if [ -n "$TEXT" ]; then
+    echo "$TEXT" | jq .
+else
+    echo "$DATA" | jq .
+fi

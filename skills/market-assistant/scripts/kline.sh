@@ -5,14 +5,23 @@
 set -e
 
 SYMBOL="${1:-}"
-PERIOD="${2:-D}"  # D=日 K, W=周 K, M=月 K, 60=60 分钟 K
-COUNT="${3:-100}"
+TYPE="${2:-0}"      # 0=日 K, 1=周 K, 2=月 K, 3=季 K, 4=年 K, 5=1 分，6=5 分，7=15 分，8=30 分，9=60 分
+CANDLE_MODE="${3:-0}"  # 0=不复权，1=前复权，2=后复权
+COUNT="${4:-100}"
+TIME_MODE="${5:-0}"    # 0=实时，1=延时
 
 if [ -z "$SYMBOL" ]; then
-    echo "用法：kline.sh <股票代码> [周期] [数量]"
-    echo "周期：D(日 K), W(周 K), M(月 K), 60(60 分钟), 30(30 分钟)"
-    echo "示例：kline.sh 00700.HK D 100"
+    echo "用法：kline.sh <股票代码> [K 线类型] [复权模式] [数量] [时间模式]"
+    echo "K 线类型：0=日 K, 1=周 K, 2=月 K, 3=季 K, 4=年 K, 5=1 分，6=5 分，7=15 分，8=30 分，9=60 分"
+    echo "复权模式：0=不复权，1=前复权，2=后复权"
+    echo "示例：kline.sh 00700.HK 0 0 100 0"
     exit 1
+fi
+
+# 获取当前日期
+DATE=$(date +%Y-%m-%d)
+if [ "$TYPE" -ge 5 ]; then
+    DATE=$(date +"%Y-%m-%d %H:%M:%S")
 fi
 
 TOKEN="${FIU_MCP_TOKEN:-}"
@@ -21,15 +30,37 @@ if [ -z "$TOKEN" ]; then
     exit 1
 fi
 
-# 调用 API
-curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
+# 计算页码
+PAGE_SIZE=100
+PAGE_NUM=$(( (COUNT + PAGE_SIZE - 1) / PAGE_SIZE ))
+
+RESPONSE=$(curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
+    -H "Accept: application/json, text/event-stream" \
     -d "{
-        \"tool\": \"kline\",
+        \"jsonrpc\": \"2.0\",
+        \"id\": 1,
+        \"method\": \"tools/call\",
         \"params\": {
-            \"symbol\": \"$SYMBOL\",
-            \"period\": \"$PERIOD\",
-            \"count\": $COUNT
+            \"name\": \"post_v3_chart_kline_list\",
+            \"arguments\": {
+                \"candleMode\": $CANDLE_MODE,
+                \"timeMode\": $TIME_MODE,
+                \"type\": $TYPE,
+                \"date\": \"$DATE\",
+                \"symbol\": \"$SYMBOL\",
+                \"pageNum\": 1,
+                \"pageSize\": $COUNT
+            }
         }
-    }" | jq .
+    }")
+
+DATA=$(echo "$RESPONSE" | grep "^data:" | sed 's/^data: //')
+TEXT=$(echo "$DATA" | jq -r '.result.content[0].text' 2>/dev/null)
+
+if [ -n "$TEXT" ]; then
+    echo "$TEXT" | jq .
+else
+    echo "$DATA" | jq .
+fi

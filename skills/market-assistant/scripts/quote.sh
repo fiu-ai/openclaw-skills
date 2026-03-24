@@ -6,10 +6,11 @@ set -e
 
 SYMBOL="${1:-}"
 MARKET="${2:-HK}"
+TIME_MODE="${3:-0}"  # 0=实时，1=延时
 
 if [ -z "$SYMBOL" ]; then
-    echo "用法：quote.sh <股票代码> [市场 HK|US|CN]"
-    echo "示例：quote.sh 00700.HK HK"
+    echo "用法：quote.sh <股票代码> [市场 HK|US|CN] [时间模式 0|1]"
+    echo "示例：quote.sh 00700.HK HK 0"
     exit 1
 fi
 
@@ -38,7 +39,7 @@ if [ -z "$TOKEN" ]; then
 fi
 
 # 调用 API (JSON-RPC 2.0 格式)
-curl -s -X POST "$ENDPOINT" \
+RESPONSE=$(curl -s -X POST "$ENDPOINT" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json, text/event-stream" \
@@ -47,9 +48,21 @@ curl -s -X POST "$ENDPOINT" \
         \"id\": 1,
         \"method\": \"tools/call\",
         \"params\": {
-            \"name\": \"quote\",
+            \"name\": \"post_v3_stock_quote\",
             \"arguments\": {
-                \"symbol\": \"$SYMBOL\"
+                \"fields\": [\"snapshot\"],
+                \"symbols\": [\"$SYMBOL\"],
+                \"timeMode\": $TIME_MODE
             }
         }
-    }" | grep "^data:" | sed 's/^data: //' | jq .
+    }")
+
+# 解析 SSE 响应
+DATA=$(echo "$RESPONSE" | grep "^data:" | sed 's/^data: //')
+TEXT=$(echo "$DATA" | jq -r '.result.content[0].text' 2>/dev/null)
+
+if [ -n "$TEXT" ]; then
+    echo "$TEXT" | jq .
+else
+    echo "$DATA" | jq .
+fi
