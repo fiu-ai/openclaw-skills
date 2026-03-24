@@ -29,6 +29,9 @@ tmp/
 temp/
 *.tmp
 
+# Local documents (not for GitHub)
+PROJECT_SUMMARY.md
+
 # Secrets (keep example files, never commit actual tokens)
 *.pem
 *.key
