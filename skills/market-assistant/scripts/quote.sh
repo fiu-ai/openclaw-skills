@@ -14,16 +14,19 @@ if [ -z "$SYMBOL" ]; then
     exit 1
 fi
 
-# 根据市场选择端点
+# 根据市场选择端点和方法名
 case "$MARKET" in
     HK)
         ENDPOINT="https://mcp.szfiu.com/stock_hk_sdk/"
+        METHOD="post_v3_stock_quote"
         ;;
     US)
         ENDPOINT="https://mcp.szfiu.com/stock_us_sdk/"
+        METHOD="post_v1_stock_quote"
         ;;
     CN)
         ENDPOINT="https://mcp.szfiu.com/stock_cn_sdk/"
+        METHOD="post_v3_stock_quote"
         ;;
     *)
         echo "错误：市场参数必须是 HK、US 或 CN"
@@ -39,23 +42,48 @@ if [ -z "$TOKEN" ]; then
 fi
 
 # 调用 API (JSON-RPC 2.0 格式)
-RESPONSE=$(curl -s -X POST "$ENDPOINT" \
-    -H "Authorization: Bearer $TOKEN" \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json, text/event-stream" \
-    -d "{
-        \"jsonrpc\": \"2.0\",
-        \"id\": 1,
-        \"method\": \"tools/call\",
-        \"params\": {
-            \"name\": \"post_v3_stock_quote\",
-            \"arguments\": {
-                \"fields\": [\"snapshot\"],
-                \"symbols\": [\"$SYMBOL\"],
-                \"timeMode\": $TIME_MODE
-            }
-        }
-    }")
+# 美股需要 sessionId 参数，港股不需要
+case "$MARKET" in
+    US)
+        RESPONSE=$(curl -s -X POST "$ENDPOINT" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json, text/event-stream" \
+            -d "{
+                \"jsonrpc\": \"2.0\",
+                \"id\": 1,
+                \"method\": \"tools/call\",
+                \"params\": {
+                    \"name\": \"$METHOD\",
+                    \"arguments\": {
+                        \"fields\": [\"snapshot\"],
+                        \"symbols\": [\"$SYMBOL\"],
+                        \"timeMode\": $TIME_MODE,
+                        \"sessionId\": \"1\"
+                    }
+                }
+            }")
+        ;;
+    *)
+        RESPONSE=$(curl -s -X POST "$ENDPOINT" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json, text/event-stream" \
+            -d "{
+                \"jsonrpc\": \"2.0\",
+                \"id\": 1,
+                \"method\": \"tools/call\",
+                \"params\": {
+                    \"name\": \"$METHOD\",
+                    \"arguments\": {
+                        \"fields\": [\"snapshot\"],
+                        \"symbols\": [\"$SYMBOL\"],
+                        \"timeMode\": $TIME_MODE
+                    }
+                }
+            }")
+        ;;
+esac
 
 # 解析 SSE 响应
 DATA=$(echo "$RESPONSE" | grep "^data:" | sed 's/^data: //')
