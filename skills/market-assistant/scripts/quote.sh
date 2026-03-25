@@ -26,7 +26,7 @@ case "$MARKET" in
         ;;
     CN)
         ENDPOINT="https://mcp.szfiu.com/stock_cn_sdk/"
-        METHOD="post_v3_stock_quote"
+        METHOD="post_v1_stock_quote"
         ;;
     *)
         echo "错误：市场参数必须是 HK、US 或 CN"
@@ -42,9 +42,9 @@ if [ -z "$TOKEN" ]; then
 fi
 
 # 调用 API (JSON-RPC 2.0 格式)
-# 美股需要 sessionId 参数，港股不需要
+# 美股和 A 股需要 sessionId 参数，港股不需要
 case "$MARKET" in
-    US)
+    US|CN)
         RESPONSE=$(curl -s -X POST "$ENDPOINT" \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/json" \
@@ -64,7 +64,7 @@ case "$MARKET" in
                 }
             }")
         ;;
-    *)
+    HK)
         RESPONSE=$(curl -s -X POST "$ENDPOINT" \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/json" \
