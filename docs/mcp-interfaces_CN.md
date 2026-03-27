@@ -6,10 +6,10 @@
 
 - [港股市场 F10 MCP](#港股市场 f10-mcp)
 - [美股市场 F10 MCP](#美股市场 f10-mcp)
-- ~~[A 股市场 F10 MCP](#a 股市场 f10-mcp)~~
+- [A 股市场 F10 MCP](#a 股市场 f10-mcp)
 - [港股市场 SDK MCP](#港股市场 sdk-mcp)
 - [美股市场 SDK MCP](#美股市场 sdk-mcp)
-- ~~[A 股市场 SDK MCP](#a 股市场 sdk-mcp)~~
+- [A 股市场 SDK MCP](#a 股市场 sdk-mcp)
 - [FIU Toolkit MCP](#fiu-toolkit-mcp)
 
 ---
@@ -79,16 +79,31 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-## ~~A 股市场 F10 MCP~~
+## A 股市场 F10 MCP
 
-> *(A 股数据即将推出，暂不可用)*
+### 配置
 
-### ~~配置~~
+```json
+{
+    "mcpServers": {
+        "stockCnF10": {
+            "description": "A 股市场 F10 数据",
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/stock_cn_f10/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        }
+    }
+}
+```
 
-~~查询 A 股市场 F10 数据，包括：~~
-~~- 公司简况~~
-~~- 财务数据~~
-~~- 基础信息~~
+### 功能
+
+查询 A 股市场 F10 数据，包括：
+- 公司简况
+- 财务数据
+- 基础信息
 
 ---
 
@@ -166,24 +181,39 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-## ~~A 股市场 SDK MCP~~
+## A 股市场 SDK MCP
 
-> *(A 股数据即将推出，暂不可用)*
+### 配置
 
-### ~~配置~~
+```json
+{
+    "mcpServers": {
+        "stockCnSdk": {
+            "description": "A 股市场 SDK 数据",
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/stock_cn_sdk/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        }
+    }
+}
+```
 
-~~查询 A 股市场数据，包括：~~
-~~- 码表~~
-~~- 大盘统计~~
-~~- 盘口数据~~
-~~- 资金分析~~
-~~- 排行榜~~
-~~- 图表 K 线~~
-~~- 行业数据~~
-~~- 指数信息~~
-~~- 沪深港股通~~
-~~- 衍生品~~
-~~- 筹码分布~~
+### 功能
+
+查询 A 股市场数据，包括：
+- 码表
+- 大盘统计
+- 盘口数据
+- 资金分析
+- 排行榜
+- 图表 K 线
+- 行业数据
+- 指数信息
+- 沪深港股通
+- 衍生品
+- 筹码分布
 
 ---
 
@@ -232,7 +262,13 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
                 "Authorization": "Bearer {api_key}"
             }
         },
-        /* stockCnF10 - A股数据即将推出 */
+        "stockCnF10": {
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/stock_cn_f10/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        },
         "stockHkSdk": {
             "transport": "streamable_http",
             "url": "https://mcp.szfiu.com/stock_hk_sdk/",
@@ -247,7 +283,13 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
                 "Authorization": "Bearer {api_key}"
             }
         },
-        /* stockCnSdk - A股数据即将推出 */
+        "stockCnSdk": {
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/stock_cn_sdk/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        },
         "szfiuToolkit": {
             "transport": "streamable_http",
             "url": "https://mcp.szfiu.com/toolkit/"
@@ -275,7 +317,13 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
                 "Authorization": "Bearer {api_key}"
             }
         },
-        /* stockCnF10SSE - A股数据即将推出 */
+        "stockCnF10SSE": {
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/sse/stock_cn_f10/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        },
         "stockHkSdkSSE": {
             "transport": "streamable_http",
             "url": "https://mcp.szfiu.com/sse/stock_hk_sdk/",
@@ -290,7 +338,13 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
                 "Authorization": "Bearer {api_key}"
             }
         },
-        /* stockCnSdkSSE - A股数据即将推出 */
+        "stockCnSdkSSE": {
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/sse/stock_cn_sdk/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        },
         "szfiuToolkitSSE": {
             "transport": "streamable_http",
             "url": "https://mcp.szfiu.com/sse/toolkit/"

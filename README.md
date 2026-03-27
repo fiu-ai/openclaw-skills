@@ -55,13 +55,11 @@ Market trading assistant for querying market data and executing trades.
 |--------|-------------|----------|
 | stockHkF10 | HK Market F10 Data | `https://mcp.szfiu.com/stock_hk_f10/` |
 | stockUsF10 | US Market F10 Data | `https://mcp.szfiu.com/stock_us_f10/` |
-| ~~stockCnF10~~ | ~~A-Share Market F10 Data~~ | ~~`https://mcp.szfiu.com/stock_cn_f10/`~~ |
+| stockCnF10 | A-Share Market F10 Data | `https://mcp.szfiu.com/stock_cn_f10/` |
 | stockHkSdk | HK Market SDK Data | `https://mcp.szfiu.com/stock_hk_sdk/` |
 | stockUsSdk | US Market SDK Data | `https://mcp.szfiu.com/stock_us_sdk/` |
-| ~~stockCnSdk~~ | ~~A-Share Market SDK Data~~ | ~~`https://mcp.szfiu.com/stock_cn_sdk/`~~ |
+| stockCnSdk | A-Share Market SDK Data | `https://mcp.szfiu.com/stock_cn_sdk/` |
 | szfiuToolkit | Securities Code Lookup | `https://mcp.szfiu.com/toolkit/` |
-
-> **Note:** A-Share (CN) market data is coming soon and not yet available.
 
 ## Documentation
 

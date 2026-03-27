@@ -6,10 +6,10 @@ This document provides complete specifications for all FIU MCP Server endpoints,
 
 - [HK Market F10 MCP](#hk-market-f10-mcp)
 - [US Market F10 MCP](#us-market-f10-mcp)
-- ~~[A-Share Market F10 MCP](#a-share-market-f10-mcp)~~
+- [A-Share Market F10 MCP](#a-share-market-f10-mcp)
 - [HK Market SDK MCP](#hk-market-sdk-mcp)
 - [US Market SDK MCP](#us-market-sdk-mcp)
-- ~~[A-Share Market SDK MCP](#a-share-market-sdk-mcp)~~
+- [A-Share Market SDK MCP](#a-share-market-sdk-mcp)
 - [FIU Toolkit MCP](#fiu-toolkit-mcp)
 
 ---
@@ -79,16 +79,31 @@ Query US market F10 data, including:
 
 ---
 
-## ~~A-Share Market F10 MCP~~
+## A-Share Market F10 MCP
 
-> *(A-Share data is coming soon and not yet available)*
+### Configuration
 
-### ~~Configuration~~
+```json
+{
+    "mcpServers": {
+        "stockCnF10": {
+            "description": "A 股市场 F10 数据",
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/stock_cn_f10/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        }
+    }
+}
+```
 
-~~Query A-share market F10 data, including:~~
-~~- Company profile~~
-~~- Financial data~~
-~~- Basic information~~
+### Features
+
+Query A-share market F10 data, including:
+- Company profile
+- Financial data
+- Basic information
 
 ---
 
@@ -166,24 +181,39 @@ Query US market data, including:
 
 ---
 
-## ~~A-Share Market SDK MCP~~
+## A-Share Market SDK MCP
 
-> *(A-Share data is coming soon and not yet available)*
+### Configuration
 
-### ~~Configuration~~
+```json
+{
+    "mcpServers": {
+        "stockCnSdk": {
+            "description": "A 股市场 SDK 数据",
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/stock_cn_sdk/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        }
+    }
+}
+```
 
-~~Query A-share market data, including:~~
-~~- Code tables~~
-~~- Market statistics~~
-~~- Order book data~~
-~~- Capital analysis~~
-~~- Rankings~~
-~~- Charts & K-line~~
-~~- Industry data~~
-~~- Index information~~
-~~- Stock connect programs~~
-~~- Derivatives~~
-~~- Chip distribution~~
+### Features
+
+Query A-share market data, including:
+- Code tables
+- Market statistics
+- Order book data
+- Capital analysis
+- Rankings
+- Charts & K-line
+- Industry data
+- Index information
+- Stock connect programs
+- Derivatives
+- Chip distribution
 
 ---
 
@@ -232,7 +262,13 @@ Query US market data, including:
                 "Authorization": "Bearer {api_key}"
             }
         },
-        /* stockCnF10 - A-Share data coming soon */
+        "stockCnF10": {
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/stock_cn_f10/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        },
         "stockHkSdk": {
             "transport": "streamable_http",
             "url": "https://mcp.szfiu.com/stock_hk_sdk/",
@@ -247,7 +283,13 @@ Query US market data, including:
                 "Authorization": "Bearer {api_key}"
             }
         },
-        /* stockCnSdk - A-Share data coming soon */
+        "stockCnSdk": {
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/stock_cn_sdk/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        },
         "szfiuToolkit": {
             "transport": "streamable_http",
             "url": "https://mcp.szfiu.com/toolkit/"
@@ -275,7 +317,13 @@ Query US market data, including:
                 "Authorization": "Bearer {api_key}"
             }
         },
-        /* stockCnF10SSE - A-Share data coming soon */
+        "stockCnF10SSE": {
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/sse/stock_cn_f10/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        },
         "stockHkSdkSSE": {
             "transport": "streamable_http",
             "url": "https://mcp.szfiu.com/sse/stock_hk_sdk/",
@@ -290,7 +338,13 @@ Query US market data, including:
                 "Authorization": "Bearer {api_key}"
             }
         },
-        /* stockCnSdkSSE - A-Share data coming soon */
+        "stockCnSdkSSE": {
+            "transport": "streamable_http",
+            "url": "https://mcp.szfiu.com/sse/stock_cn_sdk/",
+            "headers": {
+                "Authorization": "Bearer {api_key}"
+            }
+        },
         "szfiuToolkitSSE": {
             "transport": "streamable_http",
             "url": "https://mcp.szfiu.com/sse/toolkit/"
