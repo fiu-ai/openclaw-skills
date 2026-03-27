@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project provides OpenClaw skills for interacting with FIU (Shenzhen Fiutai) MCP Server, enabling AI assistants to access market data and trading capabilities through natural language.
+This project provides OpenClaw skills for interacting with SZFIU  MCP Server, enabling AI assistants to access market data and trading capabilities through natural language.
 
 ## Features
 
