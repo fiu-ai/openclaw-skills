@@ -2,14 +2,14 @@
 
 ## 描述
 
-基于 FIU MCP Server 的行情查询和交易助手技能，支持港股、美股、A 股三个市场的实时行情查询、K 线数据、资金流向、交易下单等功能。
+基于 FIU MCP Server 的行情查询和交易助手技能，支持港股、美股、~~A 股~~三个市场的实时行情查询、K 线数据、资金流向、交易下单等功能。
 
 ## 触发关键词
 
 - 行情查询相关：行情、股价、报价、涨跌、K 线、分时、盘口
 - 交易相关：买入、卖出、下单、撤单、持仓、资金
 - 市场分析：资金流向、板块、排行榜、行业
-- 市场代码：HK、US、CN、港股、美股、A 股
+- 市场代码：HK、US、~~CN~~、港股、美股、~~A 股~~
 
 ## 配置
 
@@ -33,7 +33,7 @@ export FIU_MCP_TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 |------|---------|---------|
 | 港股 | `https://mcp.szfiu.com/stock_hk_f10/` | `https://mcp.szfiu.com/stock_hk_sdk/` |
 | 美股 | `https://mcp.szfiu.com/stock_us_f10/` | `https://mcp.szfiu.com/stock_us_sdk/` |
-| A 股 | `https://mcp.szfiu.com/stock_cn_f10/` | `https://mcp.szfiu.com/stock_cn_sdk/` |
+| ~~A 股~~ | ~~`https://mcp.szfiu.com/stock_cn_f10/`~~ | ~~`https://mcp.szfiu.com/stock_cn_sdk/`~~ |
 | 代码检索 | `https://mcp.szfiu.com/toolkit/` | - |
 
 ## 功能列表

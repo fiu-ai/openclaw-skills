@@ -55,11 +55,13 @@ export FIU_MCP_TOKEN="your_jwt_token_here"
 |--------|------|------|
 | stockHkF10 | 港股市场 F10 数据 | `https://mcp.szfiu.com/stock_hk_f10/` |
 | stockUsF10 | 美股市场 F10 数据 | `https://mcp.szfiu.com/stock_us_f10/` |
-| stockCnF10 | A 股市场 F10 数据 | `https://mcp.szfiu.com/stock_cn_f10/` |
+| ~~stockCnF10~~ | ~~A 股市场 F10 数据~~ | ~~`https://mcp.szfiu.com/stock_cn_f10/`~~ |
 | stockHkSdk | 港股市场 SDK 数据 | `https://mcp.szfiu.com/stock_hk_sdk/` |
 | stockUsSdk | 美股市场 SDK 数据 | `https://mcp.szfiu.com/stock_us_sdk/` |
-| stockCnSdk | A 股市场 SDK 数据 | `https://mcp.szfiu.com/stock_cn_sdk/` |
+| ~~stockCnSdk~~ | ~~A 股市场 SDK 数据~~ | ~~`https://mcp.szfiu.com/stock_cn_sdk/`~~ |
 | szfiuToolkit | 证券代码检索工具 | `https://mcp.szfiu.com/toolkit/` |
+
+> **备注：** A 股市场数据即将推出，敬请期待。
 
 ## 文档
 

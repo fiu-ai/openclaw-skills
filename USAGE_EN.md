@@ -182,7 +182,7 @@ A: Real-time subscription quota is 100～2000, depending on account level. Relea
 A: Currently supported:
 - HK Stock (HK)
 - US Stock (US)
-- A-Share (CN)
+- ~~A-Share (CN)~~
 
 ## Development Guide
 
