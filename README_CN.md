@@ -4,7 +4,7 @@
 
 ## 概述
 
-本项目提供用于与 FIU（深圳富途）MCP Server 交互的 OpenClaw Skills，使 AI 助手能够通过自然语言访问市场数据和交易功能。
+本项目提供用于与 SZFIU（深圳融聚汇）MCP Server 交互的 OpenClaw Skills，使 AI 助手能够通过自然语言访问市场数据和交易功能。
 
 ## 功能特性
 
