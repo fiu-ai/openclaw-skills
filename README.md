@@ -35,6 +35,9 @@ Set your FIU MCP API token in the skill configuration:
 export FIU_MCP_TOKEN="your_jwt_token_here"
 ```
 
+**JWT Token Application:**
+To obtain your MCP Server jwt_token, visit: https://mcp.szfiu.com/auth/login
+
 ## Available Skills
 
 ### market-assistant

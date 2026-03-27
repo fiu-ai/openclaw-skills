@@ -35,6 +35,9 @@ cp -r skills/* ~/.openclaw/skills/
 export FIU_MCP_TOKEN="your_jwt_token_here"
 ```
 
+**JWT Token 申请：**
+申请 MCP Server jwt_token，请访问：https://mcp.szfiu.com/auth/login
+
 ## 可用技能
 
 ### market-assistant
