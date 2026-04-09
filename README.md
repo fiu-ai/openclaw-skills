@@ -6,16 +6,27 @@
 
 This project provides OpenClaw skills for interacting with SZFIU MCP Server, enabling AI assistants to access market data and trading capabilities through natural language.
 
+## Install from ClawHub
+
+The **market-assistant** skill is available on ClawHub:
+
+👉 [fiu-market-assistant on ClawHub](https://clawhub.ai/ulnit/fiu-market-assistant)
+
+```bash
+# Install via ClawHub CLI
+clawhub install ulnit/fiu-market-assistant
+```
+
 ## Features
 
+- **MCP Router**: Universal script to call all FIU MCP APIs (recommended)
+- **Market Trading Assistant**: OpenClaw skill for market queries and trading operations
 - **MCP Interface Documentation**: Complete Markdown documentation for all FIU MCP endpoints
-- **Market Trading Assistant Skill**: OpenClaw skill for market queries and trading operations
-- **MCP Router**: Universal script to call all FIU MCP APIs
 - **Bilingual Support**: Documentation available in both Chinese and English
 
 ## Quick Start
 
-### Installation
+### Manual Installation
 
 ```bash
 # Clone or download this repository
@@ -63,17 +74,21 @@ Use the universal `mcp_router.sh` script to call any FIU MCP API:
 ```bash
 # Basic usage
 mcp_router.sh <market> <tool_name> [parameters...]
+mcp_router.sh --list-tools <market>  # List all available tools
 
 # Markets: hk_f10, us_f10, cn_f10, hk_sdk, us_sdk, cn_sdk, toolkit
 
 # Examples
-mcp_router.sh hk_sdk quote symbol=00700.HK fields=snapshot
-mcp_router.sh us_sdk kline symbol=AAPL ktype=1
+mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
+mcp_router.sh hk_sdk post_v3_chart_kline_list symbol=00700.HK type=0
 mcp_router.sh cn_f10 financials symbol=600519
 mcp_router.sh toolkit search keyword=腾讯
+
+# Discover available tools for a market
+mcp_router.sh --list-tools cn_sdk
 ```
 
-See `skills/market-assistant/docs/MCP_TOOLS.md` for complete tool reference.
+**Note**: Tool names may differ between markets. Use `mcp_router.sh --list-tools <market>` to discover exact tool names. See `skills/market-assistant/docs/MCP_TOOLS.md` for known tool mappings.
 
 ## MCP Servers
 
@@ -91,7 +106,7 @@ See `skills/market-assistant/docs/MCP_TOOLS.md` for complete tool reference.
 
 - [MCP Interface Documentation (Chinese)](docs/mcp-interfaces_CN.md)
 - [MCP Interface Documentation (English)](docs/mcp-interfaces_EN.md)
-- [MCP Tools Reference](skills/market-assistant/docs/MCP_TOOLS.md) - Complete tool list for market-assistant
+- [MCP Tools Reference](skills/market-assistant/docs/MCP_TOOLS.md) - Known tool mappings and discovery guide
 
 ## Project Structure
 
@@ -140,7 +155,7 @@ After installation, test the skill in OpenClaw:
 Or use MCP Router directly:
 
 ```
-/market-assistant mcp_router.sh hk_sdk quote symbol=00700.HK
+/market-assistant mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
 ```
 
 ## Security Notice
@@ -162,5 +177,6 @@ Contributions welcome! Please read our contributing guidelines before submitting
 
 ## Support
 
+- ClawHub: [fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
 - Documentation: [FIU MCP Docs](https://mcp.szfiu.com)
 - Issues: [GitHub Issues](https://github.com/fiu-ai/openclaw-skills/issues)

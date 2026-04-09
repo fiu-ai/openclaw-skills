@@ -6,16 +6,27 @@
 
 本项目提供用于与 SZFIU（深圳融聚汇）MCP Server 交互的 OpenClaw Skills，使 AI 助手能够通过自然语言访问市场数据和交易功能。
 
+## 从 ClawHub 安装
+
+**market-assistant** 技能已在 ClawHub 上架：
+
+👉 [ClawHub 上的 fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
+
+```bash
+# 通过 ClawHub CLI 安装
+clawhub install ulnit/fiu-market-assistant
+```
+
 ## 功能特性
 
-- **MCP 接口文档**：所有 FIU MCP 端点的完整 Markdown 文档
+- **MCP Router**：通用脚本，可调用所有 FIU MCP API（推荐）
 - **行情交易助手技能**：用于市场查询和交易操作的 OpenClaw Skill
-- **MCP Router**：通用脚本，可调用所有 FIU MCP API
+- **MCP 接口文档**：所有 FIU MCP 端点的完整 Markdown 文档
 - **双语支持**：文档同时提供中文和英文版本
 
 ## 快速开始
 
-### 安装
+### 手动安装
 
 ```bash
 # 克隆或下载本仓库
@@ -63,17 +74,21 @@ export FIU_MCP_TOKEN="your_jwt_token_here"
 ```bash
 # 基本用法
 mcp_router.sh <市场> <工具名> [参数...]
+mcp_router.sh --list-tools <市场>  # 列出该市场所有可用工具
 
 # 市场: hk_f10, us_f10, cn_f10, hk_sdk, us_sdk, cn_sdk, toolkit
 
 # 示例
-mcp_router.sh hk_sdk quote symbol=00700.HK fields=snapshot
-mcp_router.sh us_sdk kline symbol=AAPL ktype=1
+mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
+mcp_router.sh hk_sdk post_v3_chart_kline_list symbol=00700.HK type=0
 mcp_router.sh cn_f10 financials symbol=600519
 mcp_router.sh toolkit search keyword=腾讯
+
+# 发现市场可用工具
+mcp_router.sh --list-tools cn_sdk
 ```
 
-完整工具列表请参阅 `skills/market-assistant/docs/MCP_TOOLS.md`。
+**注意**：不同市场的工具名称可能不同。请使用 `mcp_router.sh --list-tools <市场>` 发现具体的工具名称。完整工具映射请参考 `skills/market-assistant/docs/MCP_TOOLS.md`。
 
 ## MCP 服务器列表
 
@@ -91,7 +106,7 @@ mcp_router.sh toolkit search keyword=腾讯
 
 - [MCP 接口文档（中文）](docs/mcp-interfaces_CN.md)
 - [MCP 接口文档（英文）](docs/mcp-interfaces_EN.md)
-- [MCP 工具参考](skills/market-assistant/docs/MCP_TOOLS.md) - market-assistant 完整工具列表
+- [MCP 工具参考](skills/market-assistant/docs/MCP_TOOLS.md) - 工具映射与发现指南
 
 ## 项目结构
 
@@ -140,7 +155,7 @@ openclaw-skills/
 或直接使用 MCP Router：
 
 ```
-/market-assistant mcp_router.sh hk_sdk quote symbol=00700.HK
+/market-assistant mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
 ```
 
 ## 安全说明
@@ -162,5 +177,6 @@ MIT License
 
 ## 支持
 
+- ClawHub: [fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
 - 文档：[FIU MCP Docs](https://mcp.szfiu.com)
 - 问题：[GitHub Issues](https://github.com/fiu-ai/openclaw-skills/issues)
