@@ -191,5 +191,6 @@ Place orders (default SIMULATE mode):
 - Trading defaults to SIMULATE mode for safety
 - Real trading requires explicit "REAL" confirmation
 - Always check market status before trading
-- Keep your JWT token secure
-- Restart Claude Code after configuration changes
+- Config files are stored with restricted permissions (600) - only owner can read
+- The setup command will backup existing ~/.mcp.json before overwriting
+- Consider using environment variables instead of config files for added security

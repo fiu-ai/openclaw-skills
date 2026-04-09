@@ -82,9 +82,10 @@ cmd_setup() {
         cp "$MCP_FILE" "$MCP_FILE.bak"
     fi
 
-    # Save config
+    # Save config with secure permissions
     mkdir -p "$HOME/.fiu-market"
     echo "export FIU_MCP_TOKEN=\"$TOKEN\"" > "$CONFIG_FILE"
+    chmod 600 "$CONFIG_FILE"  # Secure: only owner can read
 
     # Create MCP config - warn users to merge if they have existing config
     cat > "$MCP_FILE" << MCPEOF
