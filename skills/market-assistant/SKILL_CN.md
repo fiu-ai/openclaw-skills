@@ -1,3 +1,15 @@
+---
+name: market-assistant
+description: "FIU MCP Market Data and Trading Assistant"
+version: "1.0.3"
+metadata:
+  openclaw:
+    requires:
+      env:
+        - FIU_MCP_TOKEN
+      primaryCredential: FIU_MCP_TOKEN
+---
+
 # market-assistant — FIU MCP 行情交易助手
 
 ## 描述
