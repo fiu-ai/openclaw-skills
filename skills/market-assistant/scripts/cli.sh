@@ -75,11 +75,18 @@ cmd_setup() {
         exit 1
     fi
 
+    # Warn about ~/.mcp.json
+    if [ -f "$MCP_FILE" ]; then
+        echo -e "${YELLOW}⚠️  警告: ~/.mcp.json 已存在，将被覆盖!${NC}"
+        echo "现有配置将备份为 ~/.mcp.json.bak"
+        cp "$MCP_FILE" "$MCP_FILE.bak"
+    fi
+
     # Save config
     mkdir -p "$HOME/.fiu-market"
     echo "export FIU_MCP_TOKEN=\"$TOKEN\"" > "$CONFIG_FILE"
 
-    # Create MCP config
+    # Create MCP config - warn users to merge if they have existing config
     cat > "$MCP_FILE" << MCPEOF
 {
   "mcpServers": {
@@ -95,8 +102,11 @@ cmd_setup() {
 MCPEOF
 
     echo -e "${GREEN}✅ 配置完成!${NC}"
-    echo "Token 已保存，MCP 配置已创建"
+    echo "Token 已保存，MCP 配置已创建到 ~/.mcp.json"
     echo ""
+    if [ -f "$MCP_FILE.bak" ]; then
+        echo "💾 备份文件: ~/.mcp.json.bak"
+    fi
     echo "请重启 Claude Code / OpenClaw"
 }
 
