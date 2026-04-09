@@ -1,8 +1,9 @@
 {
   "name": "market-assistant",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "FIU MCP Market Data & Trading Assistant - 行情交易助手",
   "homepage": "https://github.com/fiu-ai/openclaw-skills",
+  "source": "https://github.com/fiu-ai/openclaw-skills",
   "author": "@ulnit",
   "license": "MIT-0",
   "requiredEnvVars": [
@@ -13,6 +14,7 @@
       "sensitive": true
     }
   ],
+  "primaryCredential": "FIU_MCP_TOKEN",
   "requiredBinaries": [
     "curl",
     "jq",
