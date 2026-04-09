@@ -156,6 +156,28 @@ Place orders (default SIMULATE mode):
 | stockCnSdk | CN SDK | https://mcp.szfiu.com/stock_cn_sdk/ |
 | szfiuToolkit | Search | https://mcp.szfiu.com/toolkit/ |
 
+### Feature Support by Market
+
+| Feature | HK (港股) | US (美股) | CN (A股) |
+|---------|-----------|-----------|----------|
+| Quote | ✅ | ✅ | ✅ |
+| K-line | ✅ | ✅ | ✅ |
+| Order Book | ✅ | ✅ | ✅ |
+| Tick Data | ✅ | ✅ | ✅ |
+| Intraday | ✅ | ✅ | ✅ |
+| Capital Flow | ✅ | ❌ (limited) | ✅ |
+| Capital Distribution | ✅ | ❌ (limited) | ✅ |
+| Sector List | ✅ | ✅ | ✅ |
+| Stock Filter | ✅ | ✅ | ✅ |
+| Market Ranking | ✅ | ✅ | ✅ |
+| F10 Data | ✅ | ✅ | ✅ |
+| Trading | ✅ | ⚠️ (limited) | ✅ |
+| Search | ✅ (toolkit) | ✅ (toolkit) | ✅ (toolkit) |
+
+**Note**: 
+- US market capital flow data is limited due to data source restrictions
+- US trading may have limited functionality compared to HK/CN markets
+
 ---
 
 ## Usage Tips
