@@ -165,18 +165,14 @@ Place orders (default SIMULATE mode):
 | Order Book | ✅ | ✅ | ✅ |
 | Tick Data | ✅ | ✅ | ✅ |
 | Intraday | ✅ | ✅ | ✅ |
-| Capital Flow | ✅ | ⚠️ (check with discover) | ✅ |
-| Capital Distribution | ✅ | ❌ (limited) | ✅ |
+| Capital Flow | ✅ | ✅ | ✅ |
+| Capital Distribution | ✅ | ✅ | ✅ |
 | Sector List | ✅ | ✅ | ✅ |
 | Stock Filter | ✅ | ✅ | ✅ |
 | Market Ranking | ✅ | ✅ | ✅ |
 | F10 Data | ✅ | ✅ | ✅ |
-| Trading | ✅ | ⚠️ (check with discover) | ✅ |
-| Search | ✅ (toolkit) | ✅ (toolkit) | ✅ (toolkit) |
-
-**Note**: 
-- US market capital flow: Use `/fiu-market-assistant discover us_sdk` to check available tools
-- US trading: Use `/fiu-market-assistant discover us_sdk` to check available trading tools
+| Trading | ✅ | ✅ | ✅ |
+| Search | ✅ | ✅ | ✅ |
 
 ---
 
