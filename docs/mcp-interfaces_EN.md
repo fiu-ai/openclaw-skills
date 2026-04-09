@@ -357,12 +357,11 @@ Query A-share market data, including:
 
 ## Authentication Token
 
-Current JWT Token (valid until 2030):
-```
-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzemZpdS1tY3AtYXV0aCIsInN1YiI6ImRkYjI1NjRlLWUxZjYtNGVhOC1hZGJiLWQ5MTFjOTc2ZDNmZiIsImF1ZCI6WyJ0aGlyZC1wYXJ0eS1zeXN0ZW1zIl0sImV4cCI6MTg2OTYyMDY3NCwiaWF0IjoxNzczODg5NTAwfQ.KEQW3bFejfEEHG-ydXDrFtH3sxI9uql4nBRPPFglK5H1SFkwtbzi4DqWMjUCI_nAhjOLYx9KTe487-j--bpJ8V-JXpdayNrTnxDEFZrYe97ZFeMm9ojs2fxRhw3N21BHfJz2fxANNm5WCW6-XFENxyHlHBvnVb-TFW9dzxAotZ7vKyDQ34g_ga-ONEb2b3VyzyKUYB9Y-q3o3tdwkWQ
-```
+**Note**: You need to obtain your own JWT Token from https://mcp.szfiu.com/auth/login
 
-**Note**: Please keep your API Token secure and do not share it with unauthorized parties.
+```bash
+export FIU_MCP_TOKEN="your_jwt_token_here"
+```
 
 ---
 

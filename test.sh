@@ -4,7 +4,17 @@
 
 set -e
 
-TOKEN="${FIU_MCP_TOKEN:-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzemZpdS1tY3AtYXV0aCIsInN1YiI6ImRkYjI1NjRlLWUxZjYtNGVhOC1hZGJiLWQ5MTFjOTc2ZDNmZiIsImF1ZCI6WyJ0aGlyZC1wYXJ0eS1zeXN0ZW1zIl0sImV4cCI6MTg2OTYyMDY3NCwiaWF0IjoxNzczODg5NTAwfQ.KEQW3bFejfEEHG-ydXDrFtH3sxI9uql4nBRPPFglK5H1SFkwtbzi4DqWMjUCI_nAhjOLYx9KTe487-j--bpJ8V-JXpdayNrTnxDEFZrYe97ZFeMm9ojs2fxRhw3N21BHfJz2fxANNm5WCW6-XFENxyHlHBvnVb-TFW9dzxAotZ7vKyDQ34g_ga-ONEb2b3VyzyKUYB9Y-q3o3tdwkWQ}"
+TOKEN="${FIU_MCP_TOKEN:-}"
+
+if [ -z "$TOKEN" ]; then
+    echo "❌ 请设置 FIU_MCP_TOKEN 环境变量"
+    echo "请访问 https://mcp.szfiu.com/auth/login 获取 Token"
+    echo ""
+    echo "使用示例："
+    echo "  export FIU_MCP_TOKEN=\"your_jwt_token_here\""
+    echo "  ./test.sh"
+    exit 1
+fi
 
 echo "🧪 FIU MCP 连接测试"
 echo "=================="

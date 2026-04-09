@@ -10,6 +10,7 @@
 
 - **MCP 接口文档**：所有 FIU MCP 端点的完整 Markdown 文档
 - **行情交易助手技能**：用于市场查询和交易操作的 OpenClaw Skill
+- **MCP Router**：通用脚本，可调用所有 FIU MCP API
 - **双语支持**：文档同时提供中文和英文版本
 
 ## 快速开始
@@ -18,7 +19,7 @@
 
 ```bash
 # 克隆或下载本仓库
-cd fiu-mcp-skills
+cd openclaw-skills
 
 # 安装 skills 到 OpenClaw
 cp -r skills/* ~/.openclaw/skills/
@@ -35,6 +36,12 @@ cp -r skills/* ~/.openclaw/skills/
 export FIU_MCP_TOKEN="your_jwt_token_here"
 ```
 
+**必需的工具：**
+- `curl` - HTTP 请求
+- `jq` - JSON 处理
+- `date` - 日期/时间操作
+- `bash` - Shell 执行
+
 **JWT Token 申请：**
 申请 MCP Server jwt_token，请访问：https://mcp.szfiu.com/auth/login
 
@@ -45,9 +52,28 @@ export FIU_MCP_TOKEN="your_jwt_token_here"
 用于查询市场数据和执行交易的行情交易助手。
 
 **功能：**
-- 查询股票行情、K 线数据、买卖盘口
+- 查询股票行情、K 线数据、买卖盘口、逐笔成交、分时数据
 - 检查市场状态、资金流向、板块信息
-- 执行交易（默认为模拟环境）
+- 执行交易（默认为模拟环境，实盘需明确确认）
+- 实时订阅报价、K 线、逐笔、盘口、分时数据
+
+**MCP Router（推荐）：**
+使用通用 `mcp_router.sh` 脚本调用任意 FIU MCP API：
+
+```bash
+# 基本用法
+mcp_router.sh <市场> <工具名> [参数...]
+
+# 市场: hk_f10, us_f10, cn_f10, hk_sdk, us_sdk, cn_sdk, toolkit
+
+# 示例
+mcp_router.sh hk_sdk quote symbol=00700.HK fields=snapshot
+mcp_router.sh us_sdk kline symbol=AAPL ktype=1
+mcp_router.sh cn_f10 financials symbol=600519
+mcp_router.sh toolkit search keyword=腾讯
+```
+
+完整工具列表请参阅 `skills/market-assistant/docs/MCP_TOOLS.md`。
 
 ## MCP 服务器列表
 
@@ -65,32 +91,64 @@ export FIU_MCP_TOKEN="your_jwt_token_here"
 
 - [MCP 接口文档（中文）](docs/mcp-interfaces_CN.md)
 - [MCP 接口文档（英文）](docs/mcp-interfaces_EN.md)
+- [MCP 工具参考](skills/market-assistant/docs/MCP_TOOLS.md) - market-assistant 完整工具列表
 
-## 开发
-
-### 项目结构
+## 项目结构
 
 ```
-fiu-mcp-skills/
+openclaw-skills/
 ├── README.md
 ├── README_CN.md
+├── USAGE.md
+├── USAGE_EN.md
+├── install.sh
+├── test.sh
 ├── docs/
 │   ├── mcp-interfaces_CN.md
 │   └── mcp-interfaces_EN.md
-├── skills/
-│   └── market-assistant/
-│       ├── SKILL.md
-│       └── scripts/
-└── scripts/
+└── skills/
+    └── market-assistant/
+        ├── SKILL.md          # 英文版（默认）
+        ├── SKILL_CN.md       # 中文版
+        ├── docs/
+        │   ├── MCP_TOOLS.md
+        │   ├── mcp-interfaces_CN.md
+        │   └── mcp-interfaces_EN.md
+        └── scripts/
+            ├── mcp_router.sh  # 通用 MCP Router（推荐）
+            ├── quote.sh
+            ├── kline.sh
+            ├── orderbook.sh
+            ├── capital.sh
+            ├── trade.sh
+            ├── search.sh
+            ├── cash.sh
+            ├── positions.sh
+            └── market_status.sh
 ```
 
-### 测试
+## 测试
 
 安装后在 OpenClaw 中测试技能：
 
 ```
 /market-assistant 查询腾讯控股的实时行情
 ```
+
+或直接使用 MCP Router：
+
+```
+/market-assistant mcp_router.sh hk_sdk quote symbol=00700.HK
+```
+
+## 安全说明
+
+此技能需要 FIU_MCP_TOKEN（JWT）来访问 FIU MCP 服务。请确保：
+
+1. 您的 Token 来自可信来源
+2. 使用模拟模式进行测试后再进行实盘交易
+3. 对 Token 遵循最小权限原则
+4. 密切监控交易活动
 
 ## 许可证
 

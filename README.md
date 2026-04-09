@@ -4,12 +4,13 @@
 
 ## Overview
 
-This project provides OpenClaw skills for interacting with SZFIU  MCP Server, enabling AI assistants to access market data and trading capabilities through natural language.
+This project provides OpenClaw skills for interacting with SZFIU MCP Server, enabling AI assistants to access market data and trading capabilities through natural language.
 
 ## Features
 
 - **MCP Interface Documentation**: Complete Markdown documentation for all FIU MCP endpoints
 - **Market Trading Assistant Skill**: OpenClaw skill for market queries and trading operations
+- **MCP Router**: Universal script to call all FIU MCP APIs
 - **Bilingual Support**: Documentation available in both Chinese and English
 
 ## Quick Start
@@ -18,7 +19,7 @@ This project provides OpenClaw skills for interacting with SZFIU  MCP Server, en
 
 ```bash
 # Clone or download this repository
-cd fiu-mcp-skills
+cd openclaw-skills
 
 # Install skills to OpenClaw
 cp -r skills/* ~/.openclaw/skills/
@@ -35,6 +36,12 @@ Set your FIU MCP API token in the skill configuration:
 export FIU_MCP_TOKEN="your_jwt_token_here"
 ```
 
+**Required Binaries:**
+- `curl` - HTTP requests
+- `jq` - JSON processing
+- `date` - Date/time operations
+- `bash` - Shell execution
+
 **JWT Token Application:**
 To obtain your MCP Server jwt_token, visit: https://mcp.szfiu.com/auth/login
 
@@ -44,10 +51,29 @@ To obtain your MCP Server jwt_token, visit: https://mcp.szfiu.com/auth/login
 
 Market trading assistant for querying market data and executing trades.
 
-**Commands:**
-- Query stock quotes, K-line data, order book
+**Features:**
+- Query stock quotes, K-line data, order book, tick data, intraday data
 - Check market status, capital flow, sector information
-- Execute trades (simulation by default)
+- Execute trades (simulation by default, real trading requires explicit confirmation)
+- Real-time subscriptions for quotes, K-line, tick, order book, intraday
+
+**MCP Router (Recommended):**
+Use the universal `mcp_router.sh` script to call any FIU MCP API:
+
+```bash
+# Basic usage
+mcp_router.sh <market> <tool_name> [parameters...]
+
+# Markets: hk_f10, us_f10, cn_f10, hk_sdk, us_sdk, cn_sdk, toolkit
+
+# Examples
+mcp_router.sh hk_sdk quote symbol=00700.HK fields=snapshot
+mcp_router.sh us_sdk kline symbol=AAPL ktype=1
+mcp_router.sh cn_f10 financials symbol=600519
+mcp_router.sh toolkit search keyword=腾讯
+```
+
+See `skills/market-assistant/docs/MCP_TOOLS.md` for complete tool reference.
 
 ## MCP Servers
 
@@ -65,32 +91,64 @@ Market trading assistant for querying market data and executing trades.
 
 - [MCP Interface Documentation (Chinese)](docs/mcp-interfaces_CN.md)
 - [MCP Interface Documentation (English)](docs/mcp-interfaces_EN.md)
+- [MCP Tools Reference](skills/market-assistant/docs/MCP_TOOLS.md) - Complete tool list for market-assistant
 
-## Development
-
-### Project Structure
+## Project Structure
 
 ```
-fiu-mcp-skills/
+openclaw-skills/
 ├── README.md
 ├── README_CN.md
+├── USAGE.md
+├── USAGE_EN.md
+├── install.sh
+├── test.sh
 ├── docs/
 │   ├── mcp-interfaces_CN.md
 │   └── mcp-interfaces_EN.md
-├── skills/
-│   └── market-assistant/
-│       ├── SKILL.md
-│       └── scripts/
-└── scripts/
+└── skills/
+    └── market-assistant/
+        ├── SKILL.md          # English (default)
+        ├── SKILL_CN.md       # Chinese
+        ├── docs/
+        │   ├── MCP_TOOLS.md
+        │   ├── mcp-interfaces_CN.md
+        │   └── mcp-interfaces_EN.md
+        └── scripts/
+            ├── mcp_router.sh  # Universal MCP Router (recommended)
+            ├── quote.sh
+            ├── kline.sh
+            ├── orderbook.sh
+            ├── capital.sh
+            ├── trade.sh
+            ├── search.sh
+            ├── cash.sh
+            ├── positions.sh
+            └── market_status.sh
 ```
 
-### Testing
+## Testing
 
 After installation, test the skill in OpenClaw:
 
 ```
-/market-assistant 查询腾讯控股的实时行情
+/market-assistant Query Tencent Holdings real-time quote
 ```
+
+Or use MCP Router directly:
+
+```
+/market-assistant mcp_router.sh hk_sdk quote symbol=00700.HK
+```
+
+## Security Notice
+
+This skill requires a FIU_MCP_TOKEN (JWT) to access the FIU MCP service. Please ensure:
+
+1. Your token is obtained from a trusted source
+2. Use SIMULATE mode for testing before real trading
+3. Apply least-privilege principle to your token
+4. Monitor trading activity closely
 
 ## License
 
