@@ -1,189 +1,95 @@
 # FIU MCP Tools Reference
-# 列出所有可用的 MCP Server tools
 
-## HK F10 (stock_hk_f10)
+## Known Tool Mappings
 
-| Tool Name | Description |
-|-----------|-------------|
-| company_info | 公司基本信息 |
-| financials | 财务数据 |
-| dividend | 分红送股 |
-| split_history | 拆股历史 |
-| holders | 股东信息 |
-| news | 公告新闻 |
-| industry | 行业分类 |
+Tool names may differ between markets. Below are the confirmed tool names.
 
-## US F10 (stock_us_f10)
+### F10 Markets (hk_f10, us_f10, cn_f10)
 
-| Tool Name | Description |
-|-----------|-------------|
-| company_info | 公司基本信息 |
-| financials | 财务数据 |
-| dividend | 分红送股 |
-| split_history | 拆股历史 |
-| holders | 股东信息 |
-| news | 公告新闻 |
-| industry | 行业分类 |
+| Tool | HK | US | CN |
+|------|----|----|----|
+| company_info | `companyInfo` | `companyInfo` | `companyInfo` |
+| financials | `financials` | `financials` | `financials` |
+| dividend | `dividend` | `dividend` | `dividend` |
+| split_history | `splitHistory` | `splitHistory` | `splitHistory` |
+| holders | `holders` | `holders` | `holders` |
+| news | `news` | `news` | `news` |
+| industry | `industry` | `industry` | `industry` |
+| prospectus | - | - | `prospectus` |
+| public_listing | - | - | `publicListing` |
 
-## CN F10 (stock_cn_f10)
+### SDK Markets (hk_sdk, us_sdk, cn_sdk)
 
-| Tool Name | Description |
-|-----------|-------------|
-| company_info | 公司基本信息 |
-| financials | 财务数据 |
-| dividend | 分红送股 |
-| split_history | 拆股历史 |
-| holders | 股东信息 |
-| news | 公告新闻 |
-| industry | 行业分类 |
-| prospectus | 招股说明书 |
-| public_listing | 公募持仓 |
+| Tool | HK | US | CN |
+|------|----|----|----|
+| Quote | `post_v3_stock_quote` | `post_v1_stock_quote` | `post_v1_stock_quote` |
+| K-Line | `post_v3_chart_kline_list` | *check API* | *check API* |
+| Order Book | `post_v3_order_book` | *check API* | *check API* |
+| Tick | `post_v3_tick_trade` | *check API* | *check API* |
+| Intraday | `post_v3_intraday` | *check API* | *check API* |
+| Capital | `post_v3_capital_flow` | *check API* | *check API* |
+| Capital Dist | `post_v3_capital_distribution` | *check API* | *check API* |
+| Sector List | `post_v3_sector_list` | *check API* | *check API* |
+| Sector Stocks | `post_v3_sector_stocks` | *check API* | *check API* |
+| Stock Sector | `post_v3_stock_sector` | *check API* | *check API* |
+| Stock Filter | `post_v3_stock_filter` | *check API* | *check API* |
+| Ranking | `post_v3_market_ranking` | *check API* | *check API* |
+| Trade | `trade` | `trade` | `trade` |
+| Cancel | `cancel_order` | `cancel_order` | `cancel_order` |
+| Modify | `modify_order` | `modify_order` | `modify_order` |
+| Query Cash | `query_cash` | `query_cash` | `query_cash` |
+| Query Pos | `query_positions` | `query_positions` | `query_positions` |
+| Query Orders | `query_orders` | `query_orders` | `query_orders` |
+| Futures | `futures_trade` | `futures_trade` | `futures_trade` |
 
-## HK SDK (stock_hk_sdk)
+### Toolkit (toolkit)
 
-| Tool Name | Description |
-|-----------|-------------|
-| quote | 市场快照 |
-| kline | K线数据 |
-| orderbook | 买卖盘 |
-| tick | 逐笔成交 |
-| intraday | 分时数据 |
-| capital | 资金流向 |
-| capital_distribution | 资金分布 |
-| sector_list | 板块列表 |
-| sector_stocks | 板块成分股 |
-| stock_sector | 股票所属板块 |
-| stock_filter | 条件选股 |
-| market_ranking | 市场排行榜 |
-| trade | 下单 |
-| cancel_order | 撤单 |
-| modify_order | 改单 |
-| query_cash | 资金查询 |
-| query_positions | 持仓查询 |
-| query_orders | 订单查询 |
-| futures_trade | 期货交易 |
-| subscribe_quote | 报价订阅 |
-| subscribe_kline | K线订阅 |
-| subscribe_tick | 逐笔订阅 |
-| subscribe_orderbook | 盘口订阅 |
-| subscribe_intraday | 分时订阅 |
+| Tool | Description |
+|------|-------------|
+| `search` | Securities code search |
+| `stock_info` | Stock basic info |
 
-## US SDK (stock_us_sdk)
+## Discover Available Tools
 
-| Tool Name | Description |
-|-----------|-------------|
-| quote | 市场快照 |
-| kline | K线数据 |
-| orderbook | 买卖盘 |
-| tick | 逐笔成交 |
-| intraday | 分时数据 |
-| capital | 资金流向 |
-| capital_distribution | 资金分布 |
-| sector_list | 板块列表 |
-| sector_stocks | 板块成分股 |
-| stock_sector | 股票所属板块 |
-| stock_filter | 条件选股 |
-| market_ranking | 市场排行榜 |
-| trade | 下单 |
-| cancel_order | 撤单 |
-| modify_order | 改单 |
-| query_cash | 资金查询 |
-| query_positions | 持仓查询 |
-| query_orders | 订单查询 |
-| futures_trade | 期货交易 |
+Use this command to list all available tools for a market:
 
-## CN SDK (stock_cn_sdk)
+```bash
+curl -s -X POST https://mcp.szfiu.com/stock_hk_sdk/ \
+  -H "Authorization: Bearer $FIU_MCP_TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | grep "^data:" | sed 's/^data: //' | jq
+```
 
-| Tool Name | Description |
-|-----------|-------------|
-| quote | 市场快照 |
-| kline | K线数据 |
-| orderbook | 买卖盘 |
-| tick | 逐笔成交 |
-| intraday | 分时数据 |
-| capital | 资金流向 |
-| capital_distribution | 资金分布 |
-| sector_list | 板块列表 |
-| sector_stocks | 板块成分股 |
-| stock_sector | 股票所属板块 |
-| stock_filter | 条件选股 |
-| market_ranking | 市场排行榜 |
-| trade | 下单 |
-| cancel_order | 撤单 |
-| modify_order | 改单 |
-| query_cash | 资金查询 |
-| query_positions | 持仓查询 |
-| query_orders | 订单查询 |
-| futures_trade | 期货交易 |
-
-## Toolkit (toolkit)
-
-| Tool Name | Description |
-|-----------|-------------|
-| search | 证券代码搜索 |
-| stock_info | 股票基本信息查询 |
+Replace the endpoint URL for other markets:
+- `https://mcp.szfiu.com/stock_us_sdk/`
+- `https://mcp.szfiu.com/stock_cn_sdk/`
+- `https://mcp.szfiu.com/stock_hk_f10/`
+- `https://mcp.szfiu.com/stock_us_f10/`
+- `https://mcp.szfiu.com/stock_cn_f10/`
+- `https://mcp.szfiu.com/toolkit/`
 
 ## Usage Examples
 
-### 基本格式
+### Quote
 ```bash
-# mcp_router.sh <市场> <tool_name> [参数...]
+mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
+mcp_router.sh us_sdk post_v1_stock_quote symbol=AAPL fields=snapshot sessionId=1
+mcp_router.sh cn_sdk post_v1_stock_quote symbol=600519 fields=snapshot sessionId=1
 ```
 
-### 行情查询
+### K-Line
 ```bash
-# 港股行情
-./mcp_router.sh hk_sdk quote symbol=00700.HK fields=snapshot
-
-# 美股行情
-./mcp_router.sh us_sdk quote symbol=AAPL fields=snapshot sessionId=1
-
-# A股行情
-./mcp_router.sh cn_sdk quote symbol=600519 fields=snapshot sessionId=1
+mcp_router.sh hk_sdk post_v3_chart_kline_list symbol=00700.HK type=0 count=100
+# For CN/US, discover the correct tool name first
 ```
 
-### K线查询
+### Trade
 ```bash
-# 日K线
-./mcp_router.sh hk_sdk kline symbol=00700.HK ktype=1
-
-# 周K线
-./mcp_router.sh us_sdk kline symbol=AAPL ktype=2
-
-# 分钟K线
-./mcp_router.sh cn_sdk kline symbol=600519 ktype=5
+mcp_router.sh hk_sdk trade action=buy symbol=00700.HK qty=100 price=380
 ```
 
-### 资金流向
+### Search
 ```bash
-./mcp_router.sh hk_sdk capital symbol=00700.HK
-./mcp_router.sh cn_sdk capital symbol=600519
-```
-
-### F10 数据
-```bash
-./mcp_router.sh hk_f10 financials symbol=00700.HK
-./mcp_router.sh us_f10 company_info symbol=AAPL
-./mcp_router.sh cn_f10 dividend symbol=600519
-```
-
-### 代码搜索
-```bash
-./mcp_router.sh toolkit search keyword=腾讯
-./mcp_router.sh toolkit stock_info code=00700
-```
-
-### 交易操作 (需谨慎)
-```bash
-# 模拟买入
-./mcp_router.sh hk_sdk trade action=buy symbol=00700.HK qty=100 price=380
-
-# 查持仓
-./mcp_router.sh hk_sdk query_positions
-
-# 查资金
-./mcp_router.sh hk_sdk query_cash
-
-# 撤单
-./mcp_router.sh hk_sdk cancel_order order_id=xxx
+mcp_router.sh toolkit search keyword=腾讯
 ```

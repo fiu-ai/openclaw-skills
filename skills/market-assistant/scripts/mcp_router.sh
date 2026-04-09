@@ -15,7 +15,9 @@ usage() {
     cat << EOF
 FIU MCP Router - 通用 MCP 接口调用工具
 
-用法: $0 <市场> <tool_name> [参数...]
+用法:
+  $0 <市场> <tool_name> [参数...]
+  $0 --list-tools <市场>       # 列出该市场所有可用工具
 
 市场选项:
   hk_f10   - 港股 F10 数据
@@ -30,17 +32,11 @@ FIU MCP Router - 通用 MCP 接口调用工具
   例如: symbol=00700.HK fields=snapshot,quote
 
 示例:
-  $0 hk_sdk quote symbol=00700.HK fields=snapshot
-  $0 hk_sdk kline symbol=00700.HK ktype=1
+  $0 hk_sdk post_v3_stock_quote fields=snapshot
+  $0 hk_sdk post_v3_chart_kline_list symbol=00700.HK type=0
   $0 hk_f10 financials symbol=00700.HK
   $0 toolkit search keyword=腾讯
-  $0 cn_sdk trade action=buy symbol=600519 qty=100 price=2000
-
-常用工具列表:
-  F10 数据: financials, company_info, dividend, split_history
-  SDK 行情: quote, kline, orderbook, tick, intraday, capital, positions, orders, trade
-  SDK 搜索: search, stock_info
-  交易: trade, cancel_order, modify_order, query_cash, query_positions, query_orders
+  $0 --list-tools cn_sdk
 EOF
     exit 1
 }
@@ -63,6 +59,30 @@ fi
 
 MARKET="$1"
 TOOL_NAME="$2"
+
+# 支持 --list-tools 列出所有可用工具
+if [ "$MARKET" == "--list-tools" ] || [ "$MARKET" == "-l" ]; then
+    MARKET="$TOOL_NAME"
+    ENDPOINT="${ENDPOINTS[$MARKET]:-}"
+    if [ -z "$ENDPOINT" ]; then
+        echo "错误: 未知市场 '$MARKET'"
+        usage
+    fi
+    TOKEN="${FIU_MCP_TOKEN:-}"
+    if [ "$MARKET" != "toolkit" ] && [ -z "$TOKEN" ]; then
+        echo "错误: 请设置 FIU_MCP_TOKEN 环境变量"
+        exit 1
+    fi
+    RESPONSE=$(curl -s -X POST "$ENDPOINT" \
+        $([ "$MARKET" != "toolkit" ] && echo "-H \"Authorization: Bearer $TOKEN\"") \
+        -H "Content-Type: application/json" \
+        -H "Accept: application/json, text/event-stream" \
+        -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')
+    DATA=$(echo "$RESPONSE" | grep "^data:" | sed 's/^data: //')
+    echo "$DATA" | jq '.result.tools[] | {name: .name, description: .description}' 2>/dev/null || echo "$DATA"
+    exit 0
+fi
+
 shift 2
 
 # 解析参数

@@ -102,31 +102,35 @@ This skill includes a universal MCP Router (`mcp_router.sh`) that can call ALL F
 ### MCP Router Usage
 
 ```bash
-# 基本格式
+# Basic format
 mcp_router.sh <market> <tool_name> [parameters...]
+mcp_router.sh --list-tools <market>  # List all available tools
 
-# 市场选项: hk_f10, us_f10, cn_f10, hk_sdk, us_sdk, cn_sdk, toolkit
+# Markets: hk_f10, us_f10, cn_f10, hk_sdk, us_sdk, cn_sdk, toolkit
 
-# 示例
-mcp_router.sh hk_sdk quote symbol=00700.HK fields=snapshot
-mcp_router.sh us_sdk kline symbol=AAPL ktype=1
+# Examples (note: tool names may differ by market)
+mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
+mcp_router.sh hk_sdk post_v3_chart_kline_list symbol=00700.HK type=0
 mcp_router.sh cn_f10 financials symbol=600519
 mcp_router.sh toolkit search keyword=腾讯
+
+# Discover available tools for a market
+mcp_router.sh --list-tools cn_sdk
 ```
 
-### Available Markets & Tools
+### Available Markets
 
-| Market | Description | Tools |
-|--------|-------------|-------|
-| hk_f10 | HK F10 Data | company_info, financials, dividend, split_history, holders, news |
-| us_f10 | US F10 Data | company_info, financials, dividend, split_history, holders, news |
-| cn_f10 | CN F10 Data | company_info, financials, dividend, split_history, holders, news, prospectus |
-| hk_sdk | HK SDK Data | quote, kline, orderbook, tick, intraday, capital, trade, cancel_order, etc. |
-| us_sdk | US SDK Data | quote, kline, orderbook, tick, intraday, capital, trade, cancel_order, etc. |
-| cn_sdk | CN SDK Data | quote, kline, orderbook, tick, intraday, capital, trade, cancel_order, etc. |
-| toolkit | Code Search | search, stock_info |
+| Market | Description |
+|--------|-------------|
+| hk_f10 | HK F10 Data (company info, financials, etc.) |
+| us_f10 | US F10 Data (company info, financials, etc.) |
+| cn_f10 | CN F10 Data (company info, financials, etc.) |
+| hk_sdk | HK SDK Data (quotes, K-line, trade, etc.) |
+| us_sdk | US SDK Data (quotes, K-line, trade, etc.) |
+| cn_sdk | CN SDK Data (quotes, K-line, trade, etc.) |
+| toolkit | Code Search |
 
-See `docs/MCP_TOOLS.md` for complete tool reference.
+**Note**: Tool names may differ between markets. Use `mcp_router.sh --list-tools <market>` to discover the exact tool names for each endpoint. See `docs/MCP_TOOLS.md` for known tool mappings.
 
 ## Usage Examples
 
