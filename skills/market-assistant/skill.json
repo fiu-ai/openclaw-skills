@@ -1,7 +1,7 @@
 {
-  "name": "market-assistant",
+  "name": "fiu-market-assistant",
   "version": "1.0.3",
-  "description": "FIU MCP Market Data & Trading Assistant - 行情交易助手",
+  "description": "FIU MCP Market Data and Trading Assistant",
   "homepage": "https://github.com/fiu-ai/openclaw-skills",
   "source": "https://github.com/fiu-ai/openclaw-skills",
   "author": "@ulnit",
@@ -14,13 +14,13 @@
       "sensitive": true
     }
   ],
-  "primaryCredential": "FIU_MCP_TOKEN",
   "requiredBinaries": [
     "curl",
     "jq",
     "date",
     "bash"
   ],
+  "primaryCredential": "FIU_MCP_TOKEN",
   "capabilities": [
     "market_data_query",
     "trading"
@@ -29,5 +29,11 @@
     "mode": "both",
     "defaultMode": "SIMULATE",
     "requiresConfirmation": true
-  }
+  },
+  "user-invocable": true,
+  "allowed-tools": [
+    "Read",
+    "Write",
+    "Bash"
+  ]
 }

@@ -6,6 +6,17 @@ allowed-tools:
   - Read
   - Write
   - Bash
+metadata:
+  openclaw:
+    requires:
+      env:
+        - FIU_MCP_TOKEN
+      binaries:
+        - curl
+        - jq
+        - date
+        - bash
+      primaryCredential: FIU_MCP_TOKEN
 ---
 
 # /fiu-market-assistant — FIU 行情交易助手
