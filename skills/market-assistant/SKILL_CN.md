@@ -12,6 +12,34 @@ metadata:
 
 # market-assistant — FIU MCP 行情交易助手
 
+> **重要提示**：此技能使用 FIU MCP Server API。不同市场（港股、美股、A股）的工具名称不同，请先使用发现命令查找正确的工具名称。
+
+## 使用方法
+
+### 首先发现可用工具
+
+```
+mcp_router.sh --list-tools hk_sdk
+mcp_router.sh --list-tools cn_sdk
+```
+
+### 然后调用发现的工具
+
+```
+mcp_router.sh hk_sdk post_v3_stock_quote symbol=00700.HK fields=snapshot
+mcp_router.sh cn_sdk post_v1_stock_quote symbol=000001.SZ fields=snapshot
+```
+
+### 自然语言查询
+
+直接用自然语言提问 - 技能会自动调用相应的 API：
+
+```
+查询腾讯控股实时行情
+显示苹果日K线
+查询600519财务数据
+```
+
 ## 描述
 
 基于 FIU MCP Server 的行情查询和交易助手技能，支持港股、美股、A 股三个市场的实时行情查询、K 线数据、资金流向、交易下单等功能。

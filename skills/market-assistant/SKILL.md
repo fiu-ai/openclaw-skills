@@ -12,6 +12,34 @@ metadata:
 
 # market-assistant — FIU MCP Market Data & Trading Assistant
 
+> **Important**: This skill uses FIU MCP Server APIs. Different markets (HK, US, CN) have different tool names. Use the discovery command below to find correct tool names.
+
+## How to Use
+
+### Discovery First (Find Available Tools)
+
+```
+mcp_router.sh --list-tools hk_sdk
+mcp_router.sh --list-tools cn_sdk
+```
+
+### Then Call Discovered Tools
+
+```
+mcp_router.sh hk_sdk post_v3_stock_quote symbol=00700.HK fields=snapshot
+mcp_router.sh cn_sdk post_v1_stock_quote symbol=000001.SZ fields=snapshot
+```
+
+### Natural Language Query
+
+Simply ask in natural language - the skill will use the appropriate API:
+
+```
+Query Tencent Holdings real-time quote
+Show AAPL daily K-line
+Query stock 600519 financials
+```
+
 ## Description
 
 A market data query and trading assistant skill based on FIU MCP Server, supporting real-time quotes, K-line data, capital flow, and trading operations for HK, US, and CN stock markets.
