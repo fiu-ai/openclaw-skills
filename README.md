@@ -8,7 +8,7 @@ This project provides OpenClaw skills for interacting with SZFIU MCP Server, ena
 
 ## Install from ClawHub
 
-The **market-assistant** skill is available on ClawHub:
+The **fiu-market-assistant** skill is available on ClawHub:
 
 👉 [fiu-market-assistant on ClawHub](https://clawhub.ai/ulnit/fiu-market-assistant)
 
@@ -46,71 +46,82 @@ npx clawhub@latest list
 
 Or check `SKILL.md` for usage and version info.
 
-## Features
-
-- **MCP Router**: Universal script to call all FIU MCP APIs (recommended)
-- **Market Trading Assistant**: OpenClaw skill for market queries and trading operations
-- **MCP Interface Documentation**: Complete Markdown documentation for all FIU MCP endpoints
-- **Bilingual Support**: Documentation available in both Chinese and English
-
 ## Quick Start
 
 > **Tip:** Update OpenClaw to the latest version before installing to avoid runtime conflicts.
 
-### Installation
+### One-Command Setup
 
-Choose one of the methods below. See [Install from ClawHub](#install-from-clawhub) for detailed instructions.
-
-### Configuration
-
-Set your FIU MCP API token in the skill configuration:
+After installation, simply run:
 
 ```bash
-export FIU_MCP_TOKEN="your_jwt_token_here"
+/fiu-market-assistant setup YOUR_FIU_MCP_TOKEN
 ```
 
-**Required Binaries:**
-- `curl` - HTTP requests
-- `jq` - JSON processing
-- `date` - Date/time operations
-- `bash` - Shell execution
+Then ask naturally:
 
-**JWT Token Application:**
-To obtain your MCP Server jwt_token, visit: https://mcp.szfiu.com/auth/login
+```
+Query Tencent Holdings quote
+Show AAPL daily K-line
+Buy 100 shares Tencent
+```
 
-## Available Skills
+## Available Commands
 
-### market-assistant
+### Setup & Config
 
-Market trading assistant for querying market data and executing trades.
+```bash
+/fiu-market-assistant setup <token>    # Quick setup with token
+/fiu-market-assistant test             # Test connectivity
+/fiu-market-assistant status           # Show status
+```
 
-**Features:**
-- Query stock quotes, K-line data, order book, tick data, intraday data
-- Check market status, capital flow, sector information
-- Execute trades (simulation by default, real trading requires explicit confirmation)
-- Real-time subscriptions for quotes, K-line, tick, order book, intraday
+### Data Query
 
-**MCP Router (Recommended):**
-Use the universal `mcp_router.sh` script to call any FIU MCP API:
+```bash
+/fiu-market-assistant discover hk_sdk   # Discover available tools
+/fiu-market-assistant discover cn_sdk
+/fiu-market-assistant quote 00700       # Query quote
+/fiu-market-assistant quote AAPL
+/fiu-market-assistant kline 00700       # Query K-line
+/fiu-market-assistant search 腾讯        # Search stock code
+/fiu-market-assistant capflow 00700     # Capital flow
+```
+
+### Trading
+
+```bash
+/fiu-market-assistant trade buy 00700 100 380   # Buy (SIMULATE mode)
+/fiu-market-assistant positions                  # Query positions
+/fiu-market-assistant cash                       # Query cash
+/fiu-market-assistant orders                     # Query orders
+```
+
+## Features
+
+- **Universal MCP Router**: Call all FIU MCP APIs via `mcp_router.sh`
+- **CLI Dispatch**: Easy command-line style queries
+- **Natural Language**: Simply ask questions in plain English/Chinese
+- **Multiple Markets**: HK, US, CN stock markets
+- **Real-time Data**: Quotes, K-line, order book, capital flow
+- **Trading**: Place orders (default SIMULATE mode)
+
+## MCP Router Usage
 
 ```bash
 # Basic usage
 mcp_router.sh <market> <tool_name> [parameters...]
-mcp_router.sh --list-tools <market>  # List all available tools
+mcp_router.sh --list-tools <market>  # List available tools
 
 # Markets: hk_f10, us_f10, cn_f10, hk_sdk, us_sdk, cn_sdk, toolkit
 
 # Examples
-mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
+mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot symbol=00700.HK
 mcp_router.sh hk_sdk post_v3_chart_kline_list symbol=00700.HK type=0
-mcp_router.sh cn_f10 financials symbol=600519
-mcp_router.sh toolkit search keyword=腾讯
-
-# Discover available tools for a market
-mcp_router.sh --list-tools cn_sdk
+mcp_router.sh toolkit search key=腾讯
 ```
 
-**Note**: Tool names may differ between markets. Use `mcp_router.sh --list-tools <market>` to discover exact tool names. See `skills/market-assistant/docs/MCP_TOOLS.md` for known tool mappings.
+**Note**: Tool names may differ between markets. Use `mcp_router.sh --list-tools <market>` to discover exact tool names.
 
 ## MCP Servers
 
@@ -128,7 +139,7 @@ mcp_router.sh --list-tools cn_sdk
 
 - [MCP Interface Documentation (Chinese)](docs/mcp-interfaces_CN.md)
 - [MCP Interface Documentation (English)](docs/mcp-interfaces_EN.md)
-- [MCP Tools Reference](skills/market-assistant/docs/MCP_TOOLS.md) - Known tool mappings and discovery guide
+- [MCP Tools Reference](skills/market-assistant/docs/MCP_TOOLS.md) - Known tool mappings
 
 ## Project Structure
 
@@ -147,37 +158,15 @@ openclaw-skills/
     └── market-assistant/
         ├── SKILL.md          # English (default)
         ├── SKILL_CN.md       # Chinese
-        ├── skill.json        # Skill manifest (metadata)
-        ├── install.sh        # Installation script
+        ├── skill.json        # Skill manifest
+        ├── install.sh        # Quick setup script
         ├── docs/
         │   ├── MCP_TOOLS.md
-        │   ├── mcp-interfaces_CN.md
-        │   └── mcp-interfaces_EN.md
+        │   └── mcp-interfaces_*.md
         └── scripts/
-            ├── mcp_router.sh  # Universal MCP Router (recommended)
-            ├── quote.sh
-            ├── kline.sh
-            ├── orderbook.sh
-            ├── capital.sh
-            ├── trade.sh
-            ├── search.sh
-            ├── cash.sh
-            ├── positions.sh
-            └── market_status.sh
-```
-
-## Testing
-
-After installation, test the skill in OpenClaw:
-
-```
-/market-assistant Query Tencent Holdings real-time quote
-```
-
-Or use MCP Router directly:
-
-```
-/market-assistant mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
+            ├── cli.sh         # Main dispatch script
+            ├── mcp_router.sh # Universal MCP Router
+            └── *.sh          # Individual scripts
 ```
 
 ## Security Notice

@@ -8,7 +8,7 @@
 
 ## 从 ClawHub 安装
 
-**market-assistant** 技能已在 ClawHub 上架：
+**fiu-market-assistant** 技能已在 ClawHub 上架：
 
 👉 [ClawHub 上的 fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
 
@@ -26,7 +26,7 @@ npx clawhub@latest install fiu-market-assistant@1.0.3
 
 ### 手动安装
 
-将技能文件夹复制到 OpenClaw 工作区（优先级最高，覆盖全局技能）：
+将技能文件夹复制到 OpenClaw 工作区（优先级最高）：
 
 ```bash
 cp -r skills/market-assistant ~/.openclaw/workspace/skills/
@@ -35,8 +35,8 @@ cp -r skills/market-assistant ~/.openclaw/workspace/skills/
 ### WebUI 安装
 
 1. 打开 OpenClaw WebUI，进入 **技能** 管理界面
-2. 选择 **Local → Skills → Configure**，浏览预置技能
-3. 用空格键选择所需技能，确认后安装
+2. 选择 **Local → Skills → Configure**
+3. 用空格键选择技能，确认安装
 
 ### 验证安装
 
@@ -44,91 +44,100 @@ cp -r skills/market-assistant ~/.openclaw/workspace/skills/
 npx clawhub@latest list
 ```
 
-或查看技能目录下的 `SKILL.md` 了解使用方法和版本信息。
-
-## 功能特性
-
-- **MCP Router**：通用脚本，可调用所有 FIU MCP API（推荐）
-- **行情交易助手技能**：用于市场查询和交易操作的 OpenClaw Skill
-- **MCP 接口文档**：所有 FIU MCP 端点的完整 Markdown 文档
-- **双语支持**：文档同时提供中文和英文版本
-
 ## 快速开始
 
-> **提示：** 安装前建议更新 OpenClaw 到最新版本，以避免 Runtime 冲突。
+> **提示：** 安装前建议更新 OpenClaw 到最新版本
 
-### 安装
+### 一步配置
 
-选择以下任一方式。详细说明见 [从 ClawHub 安装](#从-clawhub-安装)。
+安装后只需运行：
+
+```bash
+/fiu-market-assistant setup 你的_FIU_MCP_TOKEN
+```
+
+然后直接提问：
+
+```
+查询腾讯控股行情
+显示苹果日K线
+买入100股腾讯
+```
+
+## 可用命令
 
 ### 配置
 
-在技能配置中设置您的 FIU MCP API token：
-
 ```bash
-export FIU_MCP_TOKEN="your_jwt_token_here"
+/fiu-market-assistant setup <token>    # 快速配置 Token
+/fiu-market-assistant test             # 测试连接
+/fiu-market-assistant status           # 显示状态
 ```
 
-**必需的工具：**
-- `curl` - HTTP 请求
-- `jq` - JSON 处理
-- `date` - 日期/时间操作
-- `bash` - Shell 执行
+### 数据查询
 
-**JWT Token 申请：**
-申请 MCP Server jwt_token，请访问：https://mcp.szfiu.com/auth/login
+```bash
+/fiu-market-assistant discover hk_sdk  # 发现可用工具
+/fiu-market-assistant discover cn_sdk
+/fiu-market-assistant quote 00700      # 查询行情
+/fiu-market-assistant quote AAPL
+/fiu-market-assistant kline 00700      # 查询K线
+/fiu-market-assistant search 腾讯       # 搜索股票代码
+/fiu-market-assistant capflow 00700    # 资金流向
+```
 
-## 可用技能
+### 交易
 
-### market-assistant
+```bash
+/fiu-market-assistant trade buy 00700 100 380  # 买入（模拟模式）
+/fiu-market-assistant positions                 # 查询持仓
+/fiu-market-assistant cash                      # 查询资金
+/fiu-market-assistant orders                    # 查询订单
+```
 
-用于查询市场数据和执行交易的行情交易助手。
+## 功能特性
 
-**功能：**
-- 查询股票行情、K 线数据、买卖盘口、逐笔成交、分时数据
-- 检查市场状态、资金流向、板块信息
-- 执行交易（默认为模拟环境，实盘需明确确认）
-- 实时订阅报价、K 线、逐笔、盘口、分时数据
+- **通用 MCP Router**：通过 `mcp_router.sh` 调用所有 FIU MCP API
+- **CLI 命令式**：简单命令行风格查询
+- **自然语言**：直接用中英文提问
+- **多市场支持**：港股、美股、A股
+- **实时数据**：行情、K线、买卖盘、资金流向
+- **交易功能**：下单（默认模拟模式）
 
-**MCP Router（推荐）：**
-使用通用 `mcp_router.sh` 脚本调用任意 FIU MCP API：
+## MCP Router 使用
 
 ```bash
 # 基本用法
 mcp_router.sh <市场> <工具名> [参数...]
-mcp_router.sh --list-tools <市场>  # 列出该市场所有可用工具
+mcp_router.sh --list-tools <市场>  # 列出可用工具
 
 # 市场: hk_f10, us_f10, cn_f10, hk_sdk, us_sdk, cn_sdk, toolkit
 
 # 示例
-mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
+mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot symbol=00700.HK
 mcp_router.sh hk_sdk post_v3_chart_kline_list symbol=00700.HK type=0
-mcp_router.sh cn_f10 financials symbol=600519
-mcp_router.sh toolkit search keyword=腾讯
-
-# 发现市场可用工具
-mcp_router.sh --list-tools cn_sdk
+mcp_router.sh toolkit search key=腾讯
 ```
 
-**注意**：不同市场的工具名称可能不同。请使用 `mcp_router.sh --list-tools <市场>` 发现具体的工具名称。完整工具映射请参考 `skills/market-assistant/docs/MCP_TOOLS.md`。
+**注意**：不同市场的工具名称可能不同。使用 `--list-tools <市场>` 发现具体工具名。
 
-## MCP 服务器列表
+## MCP 服务器
 
 | 服务器 | 描述 | 端点 |
 |--------|------|------|
-| stockHkF10 | 港股市场 F10 数据 | `https://mcp.szfiu.com/stock_hk_f10/` |
-| stockUsF10 | 美股市场 F10 数据 | `https://mcp.szfiu.com/stock_us_f10/` |
-| stockCnF10 | A 股市场 F10 数据 | `https://mcp.szfiu.com/stock_cn_f10/` |
-| stockHkSdk | 港股市场 SDK 数据 | `https://mcp.szfiu.com/stock_hk_sdk/` |
-| stockUsSdk | 美股市场 SDK 数据 | `https://mcp.szfiu.com/stock_us_sdk/` |
-| stockCnSdk | A 股市场 SDK 数据 | `https://mcp.szfiu.com/stock_cn_sdk/` |
-| szfiuToolkit | 证券代码检索工具 | `https://mcp.szfiu.com/toolkit/` |
+| stockHkF10 | 港股F10 | https://mcp.szfiu.com/stock_hk_f10/ |
+| stockUsF10 | 美股F10 | https://mcp.szfiu.com/stock_us_f10/ |
+| stockCnF10 | A股F10 | https://mcp.szfiu.com/stock_cn_f10/ |
+| stockHkSdk | 港股SDK | https://mcp.szfiu.com/stock_hk_sdk/ |
+| stockUsSdk | 美股SDK | https://mcp.szfiu.com/stock_us_sdk/ |
+| stockCnSdk | A股SDK | https://mcp.szfiu.com/stock_cn_sdk/ |
+| szfiuToolkit | 代码检索 | https://mcp.szfiu.com/toolkit/ |
 
 ## 文档
 
 - [MCP 接口文档（中文）](docs/mcp-interfaces_CN.md)
 - [MCP 接口文档（英文）](docs/mcp-interfaces_EN.md)
-- [MCP 工具参考](skills/market-assistant/docs/MCP_TOOLS.md) - 工具映射与发现指南
+- [MCP 工具参考](skills/market-assistant/docs/MCP_TOOLS.md)
 
 ## 项目结构
 
@@ -145,48 +154,26 @@ openclaw-skills/
 │   └── mcp-interfaces_EN.md
 └── skills/
     └── market-assistant/
-        ├── SKILL.md          # 英文版（默认）
+        ├── SKILL.md          # 英文版
         ├── SKILL_CN.md       # 中文版
-        ├── skill.json        # Skill 元数据清单
-        ├── install.sh        # 安装脚本
+        ├── skill.json        # 元数据
+        ├── install.sh        # 快速安装脚本
         ├── docs/
         │   ├── MCP_TOOLS.md
-        │   ├── mcp-interfaces_CN.md
-        │   └── mcp-interfaces_EN.md
+        │   └── mcp-interfaces_*.md
         └── scripts/
-            ├── mcp_router.sh  # 通用 MCP Router（推荐）
-            ├── quote.sh
-            ├── kline.sh
-            ├── orderbook.sh
-            ├── capital.sh
-            ├── trade.sh
-            ├── search.sh
-            ├── cash.sh
-            ├── positions.sh
-            └── market_status.sh
-```
-
-## 测试
-
-安装后在 OpenClaw 中测试技能：
-
-```
-/market-assistant 查询腾讯控股的实时行情
-```
-
-或直接使用 MCP Router：
-
-```
-/market-assistant mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot
+            ├── cli.sh         # 主调度脚本
+            ├── mcp_router.sh # 通用 MCP Router
+            └── *.sh           # 独立脚本
 ```
 
 ## 安全说明
 
 此技能需要 FIU_MCP_TOKEN（JWT）来访问 FIU MCP 服务。请确保：
 
-1. 您的 Token 来自可信来源
-2. 使用模拟模式进行测试后再进行实盘交易
-3. 对 Token 遵循最小权限原则
+1. Token 来自可信来源
+2. 先用模拟模式测试
+3. 遵循最小权限原则
 4. 密切监控交易活动
 
 ## 许可证
@@ -195,10 +182,10 @@ MIT License
 
 ## 贡献
 
-欢迎贡献！提交 PR 前请阅读我们的贡献指南。
+欢迎贡献！
 
 ## 支持
 
 - ClawHub: [fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
-- 文档：[FIU MCP Docs](https://mcp.szfiu.com)
-- 问题：[GitHub Issues](https://github.com/fiu-ai/openclaw-skills/issues)
+- 文档: [FIU MCP Docs](https://mcp.szfiu.com)
+- 问题: [GitHub Issues](https://github.com/fiu-ai/openclaw-skills/issues)
