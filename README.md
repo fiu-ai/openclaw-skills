@@ -110,6 +110,8 @@ openclaw-skills/
     └── market-assistant/
         ├── SKILL.md          # English (default)
         ├── SKILL_CN.md       # Chinese
+        ├── skill.json        # Skill manifest (metadata)
+        ├── install.sh        # Installation script
         ├── docs/
         │   ├── MCP_TOOLS.md
         │   ├── mcp-interfaces_CN.md
