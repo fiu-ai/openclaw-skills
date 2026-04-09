@@ -15,13 +15,13 @@
 ### CLI 安装
 
 ```bash
-npx clawhub@latest install ulnit/fiu-market-assistant
+npx clawhub@latest install fiu-market-assistant
 ```
 
 安装指定版本：
 
 ```bash
-npx clawhub@latest install ulnit/fiu-market-assistant@1.0.3
+npx clawhub@latest install fiu-market-assistant@1.0.3
 ```
 
 ### 手动安装

@@ -15,13 +15,13 @@ The **market-assistant** skill is available on ClawHub:
 ### CLI Installation
 
 ```bash
-npx clawhub@latest install ulnit/fiu-market-assistant
+npx clawhub@latest install fiu-market-assistant
 ```
 
 Install a specific version:
 
 ```bash
-npx clawhub@latest install ulnit/fiu-market-assistant@1.0.3
+npx clawhub@latest install fiu-market-assistant@1.0.3
 ```
 
 ### Manual Installation
