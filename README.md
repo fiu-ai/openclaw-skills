@@ -12,10 +12,39 @@ The **market-assistant** skill is available on ClawHub:
 
 👉 [fiu-market-assistant on ClawHub](https://clawhub.ai/ulnit/fiu-market-assistant)
 
+### CLI Installation
+
 ```bash
-# Install via ClawHub CLI
-clawhub install ulnit/fiu-market-assistant
+npx clawhub@latest install ulnit/fiu-market-assistant
 ```
+
+Install a specific version:
+
+```bash
+npx clawhub@latest install ulnit/fiu-market-assistant@1.0.3
+```
+
+### Manual Installation
+
+Copy the skill folder to OpenClaw workspace (highest priority, overrides global skills):
+
+```bash
+cp -r skills/market-assistant ~/.openclaw/workspace/skills/
+```
+
+### Install via WebUI
+
+1. Open OpenClaw WebUI, go to **Skills** management
+2. Select **Local → Skills → Configure**, browse pre-installed skills
+3. Select the skill with space key, confirm to install
+
+### Verify Installation
+
+```bash
+npx clawhub@latest list
+```
+
+Or check `SKILL.md` for usage and version info.
 
 ## Features
 
@@ -26,18 +55,11 @@ clawhub install ulnit/fiu-market-assistant
 
 ## Quick Start
 
-### Manual Installation
+> **Tip:** Update OpenClaw to the latest version before installing to avoid runtime conflicts.
 
-```bash
-# Clone or download this repository
-cd openclaw-skills
+### Installation
 
-# Install skills to OpenClaw
-cp -r skills/* ~/.openclaw/skills/
-
-# Verify installation
-# In OpenClaw chat, type / to see available skills
-```
+Choose one of the methods below. See [Install from ClawHub](#install-from-clawhub) for detailed instructions.
 
 ### Configuration
 
