@@ -1,0 +1,31 @@
+{
+  "name": "market-assistant",
+  "version": "1.0.2",
+  "description": "FIU MCP Market Data & Trading Assistant - 行情交易助手",
+  "homepage": "https://github.com/fiu-ai/openclaw-skills",
+  "author": "@ulnit",
+  "license": "MIT-0",
+  "requiredEnvVars": [
+    {
+      "name": "FIU_MCP_TOKEN",
+      "description": "JWT token for FIU MCP Server authentication. Get your token from https://mcp.szfiu.com/auth/login",
+      "required": true,
+      "sensitive": true
+    }
+  ],
+  "requiredBinaries": [
+    "curl",
+    "jq",
+    "date",
+    "bash"
+  ],
+  "capabilities": [
+    "market_data_query",
+    "trading"
+  ],
+  "trading": {
+    "mode": "both",
+    "defaultMode": "SIMULATE",
+    "requiresConfirmation": true
+  }
+}
