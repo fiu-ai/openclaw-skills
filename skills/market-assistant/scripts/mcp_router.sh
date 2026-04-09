@@ -1,0 +1,161 @@
+#!/bin/bash
+# FIU MCP Router - 通用 MCP 接口调用工具
+# 根据参数调用任意 FIU MCP Server API
+
+set -e
+
+# 颜色输出
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# 用法说明
+usage() {
+    cat << EOF
+FIU MCP Router - 通用 MCP 接口调用工具
+
+用法: $0 <市场> <tool_name> [参数...]
+
+市场选项:
+  hk_f10   - 港股 F10 数据
+  us_f10   - 美股 F10 数据
+  cn_f10   - A 股 F10 数据
+  hk_sdk   - 港股 SDK 数据
+  us_sdk   - 美股 SDK 数据
+  cn_sdk   - A 股 SDK 数据
+  toolkit  - 代码检索服务
+
+参数格式: key=value
+  例如: symbol=00700.HK fields=snapshot,quote
+
+示例:
+  $0 hk_sdk quote symbol=00700.HK fields=snapshot
+  $0 hk_sdk kline symbol=00700.HK ktype=1
+  $0 hk_f10 financials symbol=00700.HK
+  $0 toolkit search keyword=腾讯
+  $0 cn_sdk trade action=buy symbol=600519 qty=100 price=2000
+
+常用工具列表:
+  F10 数据: financials, company_info, dividend, split_history
+  SDK 行情: quote, kline, orderbook, tick, intraday, capital, positions, orders, trade
+  SDK 搜索: search, stock_info
+  交易: trade, cancel_order, modify_order, query_cash, query_positions, query_orders
+EOF
+    exit 1
+}
+
+# MCP Server 端点映射
+declare -A ENDPOINTS=(
+    ["hk_f10"]="https://mcp.szfiu.com/stock_hk_f10/"
+    ["us_f10"]="https://mcp.szfiu.com/stock_us_f10/"
+    ["cn_f10"]="https://mcp.szfiu.com/stock_cn_f10/"
+    ["hk_sdk"]="https://mcp.szfiu.com/stock_hk_sdk/"
+    ["us_sdk"]="https://mcp.szfiu.com/stock_us_sdk/"
+    ["cn_sdk"]="https://mcp.szfiu.com/stock_cn_sdk/"
+    ["toolkit"]="https://mcp.szfiu.com/toolkit/"
+)
+
+# 检查参数
+if [ $# -lt 2 ]; then
+    usage
+fi
+
+MARKET="$1"
+TOOL_NAME="$2"
+shift 2
+
+# 解析参数
+ARGS_JSON="{}"
+while [ $# -gt 0 ]; do
+    KEY=$(echo "$1" | cut -d= -f1)
+    VALUE=$(echo "$1" | cut -d= -f2-)
+    # 尝试解析 JSON 数组格式 [a,b,c]
+    if [[ "$VALUE" == \[*\] ]]; then
+        ARGS_JSON=$(echo "$ARGS_JSON" | jq --arg k "$KEY" --argjson v "$VALUE" '. + {($k): $v}')
+    else
+        ARGS_JSON=$(echo "$ARGS_JSON" | jq --arg k "$KEY" --arg v "$VALUE" '. + {($k): $v}')
+    fi
+    shift
+done
+
+# 验证市场
+if [ -z "${ENDPOINTS[$MARKET]}" ]; then
+    echo -e "${RED}错误: 未知市场 '$MARKET'${NC}"
+    usage
+fi
+
+ENDPOINT="${ENDPOINTS[$MARKET]}"
+
+# 获取 Token (toolkit 不需要认证)
+TOKEN="${FIU_MCP_TOKEN:-}"
+if [ "$MARKET" != "toolkit" ] && [ -z "$TOKEN" ]; then
+    echo -e "${RED}错误: 请设置 FIU_MCP_TOKEN 环境变量${NC}"
+    exit 1
+fi
+
+# 构建请求
+if [ "$MARKET" == "toolkit" ]; then
+    # toolkit 不需要 Authorization header
+    REQUEST_JSON=$(jq -n \
+        --jsonrpc "2.0" \
+        --id 1 \
+        --method "tools/call" \
+        --name "$TOOL_NAME" \
+        --arguments "$ARGS_JSON" \
+        '{
+            "jsonrpc": .jsonrpc,
+            "id": .id,
+            "method": .method,
+            "params": {
+                "name": .name,
+                "arguments": .arguments
+            }
+        }')
+else
+    REQUEST_JSON=$(jq -n \
+        --jsonrpc "2.0" \
+        --id 1 \
+        --method "tools/call" \
+        --name "$TOOL_NAME" \
+        --arguments "$ARGS_JSON" \
+        '{
+            "jsonrpc": .jsonrpc,
+            "id": .id,
+            "method": .method,
+            "params": {
+                "name": .name,
+                "arguments": .arguments
+            }
+        }')
+fi
+
+# 调用 API
+if [ "$MARKET" == "toolkit" ]; then
+    RESPONSE=$(curl -s -X POST "$ENDPOINT" \
+        -H "Content-Type: application/json" \
+        -H "Accept: application/json, text/event-stream" \
+        -d "$REQUEST_JSON")
+else
+    RESPONSE=$(curl -s -X POST "$ENDPOINT" \
+        -H "Authorization: Bearer $TOKEN" \
+        -H "Content-Type: application/json" \
+        -H "Accept: application/json, text/event-stream" \
+        -d "$REQUEST_JSON")
+fi
+
+# 解析响应
+if echo "$RESPONSE" | grep -q "^data:"; then
+    # SSE 响应格式
+    DATA=$(echo "$RESPONSE" | grep "^data:" | sed 's/^data: //')
+    TEXT=$(echo "$DATA" | jq -r '.result.content[0].text' 2>/dev/null)
+
+    if [ -n "$TEXT" ] && [ "$TEXT" != "null" ]; then
+        echo "$TEXT" | jq . 2>/dev/null || echo "$TEXT"
+    else
+        echo "$DATA" | jq . 2>/dev/null || echo "$DATA"
+    fi
+else
+    # 普通 JSON 响应
+    echo "$RESPONSE" | jq .
+fi
