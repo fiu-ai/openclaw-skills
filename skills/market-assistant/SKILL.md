@@ -191,6 +191,8 @@ Place orders (default SIMULATE mode):
 - Trading defaults to SIMULATE mode for safety
 - Real trading requires explicit "REAL" confirmation
 - Always check market status before trading
+- The setup command will create/overwrite ~/.mcp.json (standard MCP config file)
+- Backup is created automatically before overwriting
 - Config files are stored with restricted permissions (600) - only owner can read
-- The setup command will backup existing ~/.mcp.json before overwriting
-- Consider using environment variables instead of config files for added security
+- This skill adds 7 FIU MCP entries to your MCP configuration
+- Other MCP-enabled tools may also use ~/.mcp.json - review after setup if needed
