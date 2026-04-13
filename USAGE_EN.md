@@ -157,7 +157,7 @@ Response format:
 
 ### Q: How to get API Token?
 
-A: Contact FIU official to get JWT Token, or register at https://mcp.szfiu.com.
+A: Contact FIU official to get JWT Token, or register at https://ai.szfiu.com.
 
 ### Q: Is trading real or simulation?
 
@@ -205,7 +205,7 @@ if [ -z "$TOKEN" ]; then
     exit 1
 fi
 
-curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
+curl -s -X POST "https://ai.szfiu.com/stock_hk_sdk/" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json, text/event-stream" \
@@ -224,7 +224,7 @@ curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
 
 ## Resources
 
-- [FIU MCP Official Docs](https://mcp.szfiu.com)
+- [FIU MCP Official Docs](https://ai.szfiu.com)
 - [GitHub Repository](https://github.com/fiu-ai/openclaw-skills)
 - [OpenClaw Docs](https://docs.openclaw.ai)
 - [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)

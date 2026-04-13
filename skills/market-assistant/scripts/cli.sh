@@ -71,7 +71,7 @@ cmd_setup() {
     TOKEN="$1"
     if [ -z "$TOKEN" ]; then
         echo "用法: setup <FIU_MCP_TOKEN>"
-        echo "获取Token: https://mcp.szfiu.com/auth/login"
+        echo "获取Token: https://ai.szfiu.com/auth/login"
         exit 1
     fi
 
@@ -91,13 +91,13 @@ cmd_setup() {
     cat > "$MCP_FILE" << MCPEOF
 {
   "mcpServers": {
-    "stockHkF10": {"transport":"streamable_http","url":"https://mcp.szfiu.com/stock_hk_f10/","headers":{"Authorization":"Bearer $TOKEN"}},
-    "stockUsF10": {"transport":"streamable_http","url":"https://mcp.szfiu.com/stock_us_f10/","headers":{"Authorization":"Bearer $TOKEN"}},
-    "stockCnF10": {"transport":"streamable_http","url":"https://mcp.szfiu.com/stock_cn_f10/","headers":{"Authorization":"Bearer $TOKEN"}},
-    "stockHkSdk": {"transport":"streamable_http","url":"https://mcp.szfiu.com/stock_hk_sdk/","headers":{"Authorization":"Bearer $TOKEN"}},
-    "stockUsSdk": {"transport":"streamable_http","url":"https://mcp.szfiu.com/stock_us_sdk/","headers":{"Authorization":"Bearer $TOKEN"}},
-    "stockCnSdk": {"transport":"streamable_http","url":"https://mcp.szfiu.com/stock_cn_sdk/","headers":{"Authorization":"Bearer $TOKEN"}},
-    "szfiuToolkit": {"transport":"streamable_http","url":"https://mcp.szfiu.com/toolkit/"}
+    "stockHkF10": {"transport":"streamable_http","url":"https://ai.szfiu.com/stock_hk_f10/","headers":{"Authorization":"Bearer $TOKEN"}},
+    "stockUsF10": {"transport":"streamable_http","url":"https://ai.szfiu.com/stock_us_f10/","headers":{"Authorization":"Bearer $TOKEN"}},
+    "stockCnF10": {"transport":"streamable_http","url":"https://ai.szfiu.com/stock_cn_f10/","headers":{"Authorization":"Bearer $TOKEN"}},
+    "stockHkSdk": {"transport":"streamable_http","url":"https://ai.szfiu.com/stock_hk_sdk/","headers":{"Authorization":"Bearer $TOKEN"}},
+    "stockUsSdk": {"transport":"streamable_http","url":"https://ai.szfiu.com/stock_us_sdk/","headers":{"Authorization":"Bearer $TOKEN"}},
+    "stockCnSdk": {"transport":"streamable_http","url":"https://ai.szfiu.com/stock_cn_sdk/","headers":{"Authorization":"Bearer $TOKEN"}},
+    "szfiuToolkit": {"transport":"streamable_http","url":"https://ai.szfiu.com/toolkit/"}
   }
 }
 MCPEOF
@@ -120,7 +120,7 @@ cmd_test() {
 
     # Test toolkit (no auth needed)
     echo "1. 测试 szfiuToolkit..."
-    RESP=$(curl -s -X POST "https://mcp.szfiu.com/toolkit/" \
+    RESP=$(curl -s -X POST "https://ai.szfiu.com/toolkit/" \
         -H "Content-Type: application/json" \
         -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')
     if echo "$RESP" | grep -q "tools"; then
@@ -131,7 +131,7 @@ cmd_test() {
 
     # Test HK SDK
     echo "2. 测试 stockHkSdk..."
-    RESP=$(curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
+    RESP=$(curl -s -X POST "https://ai.szfiu.com/stock_hk_sdk/" \
         -H "Authorization: Bearer $FIU_MCP_TOKEN" \
         -H "Content-Type: application/json" \
         -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')
@@ -143,7 +143,7 @@ cmd_test() {
 
     # Test CN SDK
     echo "3. 测试 stockCnSdk..."
-    RESP=$(curl -s -X POST "https://mcp.szfiu.com/stock_cn_sdk/" \
+    RESP=$(curl -s -X POST "https://ai.szfiu.com/stock_cn_sdk/" \
         -H "Authorization: Bearer $FIU_MCP_TOKEN" \
         -H "Content-Type: application/json" \
         -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')
@@ -166,13 +166,13 @@ cmd_discover() {
     fi
 
     declare -A ENDPOINTS=(
-        ["hk_f10"]="https://mcp.szfiu.com/stock_hk_f10/"
-        ["us_f10"]="https://mcp.szfiu.com/stock_us_f10/"
-        ["cn_f10"]="https://mcp.szfiu.com/stock_cn_f10/"
-        ["hk_sdk"]="https://mcp.szfiu.com/stock_hk_sdk/"
-        ["us_sdk"]="https://mcp.szfiu.com/stock_us_sdk/"
-        ["cn_sdk"]="https://mcp.szfiu.com/stock_cn_sdk/"
-        ["toolkit"]="https://mcp.szfiu.com/toolkit/"
+        ["hk_f10"]="https://ai.szfiu.com/stock_hk_f10/"
+        ["us_f10"]="https://ai.szfiu.com/stock_us_f10/"
+        ["cn_f10"]="https://ai.szfiu.com/stock_cn_f10/"
+        ["hk_sdk"]="https://ai.szfiu.com/stock_hk_sdk/"
+        ["us_sdk"]="https://ai.szfiu.com/stock_us_sdk/"
+        ["cn_sdk"]="https://ai.szfiu.com/stock_cn_sdk/"
+        ["toolkit"]="https://ai.szfiu.com/toolkit/"
     )
 
     ENDPOINT="${ENDPOINTS[$MARKET]}"
@@ -220,7 +220,7 @@ cmd_quote() {
 
     echo "📊 查询 $SYMBOL 行情..."
 
-    RESP=$(curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
+    RESP=$(curl -s -X POST "https://ai.szfiu.com/stock_hk_sdk/" \
         -H "Authorization: Bearer $FIU_MCP_TOKEN" \
         -H "Content-Type: application/json" \
         -d "{
@@ -256,7 +256,7 @@ cmd_search() {
 
     echo "🔍 搜索 $KEYWORD ..."
 
-    RESP=$(curl -s -X POST "https://mcp.szfiu.com/toolkit/" \
+    RESP=$(curl -s -X POST "https://ai.szfiu.com/toolkit/" \
         -H "Content-Type: application/json" \
         -d "{
             \"jsonrpc\": \"2.0\",

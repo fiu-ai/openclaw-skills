@@ -9,7 +9,7 @@
   "requiredEnvVars": [
     {
       "name": "FIU_MCP_TOKEN",
-      "description": "JWT token for FIU MCP Server authentication. Get your token from https://mcp.szfiu.com/auth/login",
+      "description": "JWT token for FIU MCP Server authentication. Get your token from https://ai.szfiu.com/auth/login",
       "required": true,
       "sensitive": true
     }

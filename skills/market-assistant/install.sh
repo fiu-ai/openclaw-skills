@@ -13,7 +13,7 @@ if [ -z "$1" ]; then
     echo ""
     echo "示例: $0 eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
     echo ""
-    echo "获取 Token: https://mcp.szfiu.com/auth/login"
+    echo "获取 Token: https://ai.szfiu.com/auth/login"
     exit 1
 fi
 
@@ -45,7 +45,7 @@ cat > "$MCP_FILE" << 'MCPEOF'
     "stockHkF10": {
       "description": "港股市场F10数据",
       "transport": "streamable_http",
-      "url": "https://mcp.szfiu.com/stock_hk_f10/",
+      "url": "https://ai.szfiu.com/stock_hk_f10/",
       "headers": {
         "Authorization": "Bearer TOKEN_PLACEHOLDER"
       }
@@ -53,7 +53,7 @@ cat > "$MCP_FILE" << 'MCPEOF'
     "stockUsF10": {
       "description": "美股市场F10数据",
       "transport": "streamable_http",
-      "url": "https://mcp.szfiu.com/stock_us_f10/",
+      "url": "https://ai.szfiu.com/stock_us_f10/",
       "headers": {
         "Authorization": "Bearer TOKEN_PLACEHOLDER"
       }
@@ -61,7 +61,7 @@ cat > "$MCP_FILE" << 'MCPEOF'
     "stockCnF10": {
       "description": "A股市场F10数据",
       "transport": "streamable_http",
-      "url": "https://mcp.szfiu.com/stock_cn_f10/",
+      "url": "https://ai.szfiu.com/stock_cn_f10/",
       "headers": {
         "Authorization": "Bearer TOKEN_PLACEHOLDER"
       }
@@ -69,7 +69,7 @@ cat > "$MCP_FILE" << 'MCPEOF'
     "stockHkSdk": {
       "description": "港股市场SDK数据",
       "transport": "streamable_http",
-      "url": "https://mcp.szfiu.com/stock_hk_sdk/",
+      "url": "https://ai.szfiu.com/stock_hk_sdk/",
       "headers": {
         "Authorization": "Bearer TOKEN_PLACEHOLDER"
       }
@@ -77,7 +77,7 @@ cat > "$MCP_FILE" << 'MCPEOF'
     "stockUsSdk": {
       "description": "美股市场SDK数据",
       "transport": "streamable_http",
-      "url": "https://mcp.szfiu.com/stock_us_sdk/",
+      "url": "https://ai.szfiu.com/stock_us_sdk/",
       "headers": {
         "Authorization": "Bearer TOKEN_PLACEHOLDER"
       }
@@ -85,7 +85,7 @@ cat > "$MCP_FILE" << 'MCPEOF'
     "stockCnSdk": {
       "description": "A股市场SDK数据",
       "transport": "streamable_http",
-      "url": "https://mcp.szfiu.com/stock_cn_sdk/",
+      "url": "https://ai.szfiu.com/stock_cn_sdk/",
       "headers": {
         "Authorization": "Bearer TOKEN_PLACEHOLDER"
       }
@@ -93,7 +93,7 @@ cat > "$MCP_FILE" << 'MCPEOF'
     "szfiuToolkit": {
       "description": "FIU检索证券代码服务",
       "transport": "streamable_http",
-      "url": "https://mcp.szfiu.com/toolkit/"
+      "url": "https://ai.szfiu.com/toolkit/"
     }
   }
 }
@@ -108,7 +108,7 @@ echo "✅ MCP 配置已保存到 $MCP_FILE"
 echo ""
 echo "🧪 测试连接..."
 
-TEST_RESPONSE=$(curl -s -X POST "https://mcp.szfiu.com/toolkit/" \
+TEST_RESPONSE=$(curl -s -X POST "https://ai.szfiu.com/toolkit/" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json, text/event-stream" \
     -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')

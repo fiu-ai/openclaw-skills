@@ -8,7 +8,7 @@ TOKEN="${FIU_MCP_TOKEN:-}"
 
 if [ -z "$TOKEN" ]; then
     echo "❌ 请设置 FIU_MCP_TOKEN 环境变量"
-    echo "请访问 https://mcp.szfiu.com/auth/login 获取 Token"
+    echo "请访问 https://ai.szfiu.com/auth/login 获取 Token"
     echo ""
     echo "使用示例："
     echo "  export FIU_MCP_TOKEN=\"your_jwt_token_here\""
@@ -22,7 +22,7 @@ echo ""
 
 # 测试 Toolkit（无需认证）- JSON-RPC 2.0 格式
 echo "1️⃣  测试 Toolkit (证券代码检索)..."
-RESPONSE=$(curl -s -X POST "https://mcp.szfiu.com/toolkit/" \
+RESPONSE=$(curl -s -X POST "https://ai.szfiu.com/toolkit/" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json, text/event-stream" \
     -d '{
@@ -52,7 +52,7 @@ echo ""
 
 # 测试港股 SDK（需要认证）- JSON-RPC 2.0 格式
 echo "2️⃣  测试港股 SDK (市场快照)..."
-RESPONSE=$(curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
+RESPONSE=$(curl -s -X POST "https://ai.szfiu.com/stock_hk_sdk/" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json, text/event-stream" \

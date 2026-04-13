@@ -148,13 +148,13 @@ metadata:
 
 | 服务 | 市场 | URL |
 |------|------|-----|
-| stockHkF10 | 港股F10 | https://mcp.szfiu.com/stock_hk_f10/ |
-| stockUsF10 | 美股F10 | https://mcp.szfiu.com/stock_us_f10/ |
-| stockCnF10 | A股F10 | https://mcp.szfiu.com/stock_cn_f10/ |
-| stockHkSdk | 港股SDK | https://mcp.szfiu.com/stock_hk_sdk/ |
-| stockUsSdk | 美股SDK | https://mcp.szfiu.com/stock_us_sdk/ |
-| stockCnSdk | A股SDK | https://mcp.szfiu.com/stock_cn_sdk/ |
-| szfiuToolkit | 代码检索 | https://mcp.szfiu.com/toolkit/ |
+| stockHkF10 | 港股F10 | https://ai.szfiu.com/stock_hk_f10/ |
+| stockUsF10 | 美股F10 | https://ai.szfiu.com/stock_us_f10/ |
+| stockCnF10 | A股F10 | https://ai.szfiu.com/stock_cn_f10/ |
+| stockHkSdk | 港股SDK | https://ai.szfiu.com/stock_hk_sdk/ |
+| stockUsSdk | 美股SDK | https://ai.szfiu.com/stock_us_sdk/ |
+| stockCnSdk | A股SDK | https://ai.szfiu.com/stock_cn_sdk/ |
+| szfiuToolkit | 代码检索 | https://ai.szfiu.com/toolkit/ |
 
 ### 各市场功能支持
 
@@ -184,7 +184,7 @@ metadata:
 4. **美股**: 使用格式 `AAPL` 或 `AAPL.US`
 5. **A股**: 使用格式 `600519.SZ` 或 `000001.SZ`
 6. **限频**: 30秒内最多15笔订单
-7. **获取Token**: https://mcp.szfiu.com/auth/login
+7. **获取Token**: https://ai.szfiu.com/auth/login
 
 ## 重要提示
 

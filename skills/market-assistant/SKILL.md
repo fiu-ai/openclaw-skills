@@ -148,13 +148,13 @@ Place orders (default SIMULATE mode):
 
 | Service | Market | URL |
 |---------|--------|-----|
-| stockHkF10 | HK F10 | https://mcp.szfiu.com/stock_hk_f10/ |
-| stockUsF10 | US F10 | https://mcp.szfiu.com/stock_us_f10/ |
-| stockCnF10 | CN F10 | https://mcp.szfiu.com/stock_cn_f10/ |
-| stockHkSdk | HK SDK | https://mcp.szfiu.com/stock_hk_sdk/ |
-| stockUsSdk | US SDK | https://mcp.szfiu.com/stock_us_sdk/ |
-| stockCnSdk | CN SDK | https://mcp.szfiu.com/stock_cn_sdk/ |
-| szfiuToolkit | Search | https://mcp.szfiu.com/toolkit/ |
+| stockHkF10 | HK F10 | https://ai.szfiu.com/stock_hk_f10/ |
+| stockUsF10 | US F10 | https://ai.szfiu.com/stock_us_f10/ |
+| stockCnF10 | CN F10 | https://ai.szfiu.com/stock_cn_f10/ |
+| stockHkSdk | HK SDK | https://ai.szfiu.com/stock_hk_sdk/ |
+| stockUsSdk | US SDK | https://ai.szfiu.com/stock_us_sdk/ |
+| stockCnSdk | CN SDK | https://ai.szfiu.com/stock_cn_sdk/ |
+| szfiuToolkit | Search | https://ai.szfiu.com/toolkit/ |
 
 ### Feature Support by Market
 
@@ -184,7 +184,7 @@ Place orders (default SIMULATE mode):
 4. **US stocks**: use format `AAPL` or `AAPL.US`
 5. **CN stocks**: use format `600519.SZ` or `000001.SZ`
 6. **Rate limit**: 15 orders per 30 seconds
-7. **Get token**: https://mcp.szfiu.com/auth/login
+7. **Get token**: https://ai.szfiu.com/auth/login
 
 ## Important Notes
 

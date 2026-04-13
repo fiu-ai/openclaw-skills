@@ -125,13 +125,13 @@ mcp_router.sh toolkit search key=腾讯
 
 | 服务器 | 描述 | 端点 |
 |--------|------|------|
-| stockHkF10 | 港股F10 | https://mcp.szfiu.com/stock_hk_f10/ |
-| stockUsF10 | 美股F10 | https://mcp.szfiu.com/stock_us_f10/ |
-| stockCnF10 | A股F10 | https://mcp.szfiu.com/stock_cn_f10/ |
-| stockHkSdk | 港股SDK | https://mcp.szfiu.com/stock_hk_sdk/ |
-| stockUsSdk | 美股SDK | https://mcp.szfiu.com/stock_us_sdk/ |
-| stockCnSdk | A股SDK | https://mcp.szfiu.com/stock_cn_sdk/ |
-| szfiuToolkit | 代码检索 | https://mcp.szfiu.com/toolkit/ |
+| stockHkF10 | 港股F10 | https://ai.szfiu.com/stock_hk_f10/ |
+| stockUsF10 | 美股F10 | https://ai.szfiu.com/stock_us_f10/ |
+| stockCnF10 | A股F10 | https://ai.szfiu.com/stock_cn_f10/ |
+| stockHkSdk | 港股SDK | https://ai.szfiu.com/stock_hk_sdk/ |
+| stockUsSdk | 美股SDK | https://ai.szfiu.com/stock_us_sdk/ |
+| stockCnSdk | A股SDK | https://ai.szfiu.com/stock_cn_sdk/ |
+| szfiuToolkit | 代码检索 | https://ai.szfiu.com/toolkit/ |
 
 ## 文档
 
@@ -187,5 +187,5 @@ MIT License
 ## 支持
 
 - ClawHub: [fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
-- 文档: [FIU MCP Docs](https://mcp.szfiu.com)
+- 文档: [FIU MCP Docs](https://ai.szfiu.com)
 - 问题: [GitHub Issues](https://github.com/fiu-ai/openclaw-skills/issues)

@@ -127,13 +127,13 @@ mcp_router.sh toolkit search key=腾讯
 
 | Server | Description | Endpoint |
 |--------|-------------|----------|
-| stockHkF10 | HK Market F10 Data | `https://mcp.szfiu.com/stock_hk_f10/` |
-| stockUsF10 | US Market F10 Data | `https://mcp.szfiu.com/stock_us_f10/` |
-| stockCnF10 | A-Share Market F10 Data | `https://mcp.szfiu.com/stock_cn_f10/` |
-| stockHkSdk | HK Market SDK Data | `https://mcp.szfiu.com/stock_hk_sdk/` |
-| stockUsSdk | US Market SDK Data | `https://mcp.szfiu.com/stock_us_sdk/` |
-| stockCnSdk | A-Share Market SDK Data | `https://mcp.szfiu.com/stock_cn_sdk/` |
-| szfiuToolkit | Securities Code Lookup | `https://mcp.szfiu.com/toolkit/` |
+| stockHkF10 | HK Market F10 Data | `https://ai.szfiu.com/stock_hk_f10/` |
+| stockUsF10 | US Market F10 Data | `https://ai.szfiu.com/stock_us_f10/` |
+| stockCnF10 | A-Share Market F10 Data | `https://ai.szfiu.com/stock_cn_f10/` |
+| stockHkSdk | HK Market SDK Data | `https://ai.szfiu.com/stock_hk_sdk/` |
+| stockUsSdk | US Market SDK Data | `https://ai.szfiu.com/stock_us_sdk/` |
+| stockCnSdk | A-Share Market SDK Data | `https://ai.szfiu.com/stock_cn_sdk/` |
+| szfiuToolkit | Securities Code Lookup | `https://ai.szfiu.com/toolkit/` |
 
 ## Documentation
 
@@ -189,5 +189,5 @@ Contributions welcome! Please read our contributing guidelines before submitting
 ## Support
 
 - ClawHub: [fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
-- Documentation: [FIU MCP Docs](https://mcp.szfiu.com)
+- Documentation: [FIU MCP Docs](https://ai.szfiu.com)
 - Issues: [GitHub Issues](https://github.com/fiu-ai/openclaw-skills/issues)

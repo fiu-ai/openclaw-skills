@@ -24,7 +24,7 @@ This document provides complete specifications for all FIU MCP Server endpoints,
         "stockHkF10": {
             "description": "港股市场 F10 数据",
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_hk_f10/",
+            "url": "https://ai.szfiu.com/stock_hk_f10/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
@@ -60,7 +60,7 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
         "stockUsF10": {
             "description": "美股市场 F10 数据",
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_us_f10/",
+            "url": "https://ai.szfiu.com/stock_us_f10/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
@@ -89,7 +89,7 @@ Query US market F10 data, including:
         "stockCnF10": {
             "description": "A 股市场 F10 数据",
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_cn_f10/",
+            "url": "https://ai.szfiu.com/stock_cn_f10/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
@@ -117,7 +117,7 @@ Query A-share market F10 data, including:
         "stockHkSdk": {
             "description": "港股市场 SDK 数据",
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_hk_sdk/",
+            "url": "https://ai.szfiu.com/stock_hk_sdk/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
@@ -154,7 +154,7 @@ Query HK market data, including:
         "stockUsSdk": {
             "description": "美股市场 SDK 数据",
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_us_sdk/",
+            "url": "https://ai.szfiu.com/stock_us_sdk/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
@@ -191,7 +191,7 @@ Query US market data, including:
         "stockCnSdk": {
             "description": "A 股市场 SDK 数据",
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_cn_sdk/",
+            "url": "https://ai.szfiu.com/stock_cn_sdk/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
@@ -227,7 +227,7 @@ Query A-share market data, including:
         "szfiuToolkit": {
             "description": "FIU 检索证券代码服务",
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/toolkit/"
+            "url": "https://ai.szfiu.com/toolkit/"
         }
     }
 }
@@ -250,49 +250,49 @@ Query A-share market data, including:
     "mcpServers": {
         "stockHkF10": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_hk_f10/",
+            "url": "https://ai.szfiu.com/stock_hk_f10/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockUsF10": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_us_f10/",
+            "url": "https://ai.szfiu.com/stock_us_f10/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockCnF10": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_cn_f10/",
+            "url": "https://ai.szfiu.com/stock_cn_f10/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockHkSdk": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_hk_sdk/",
+            "url": "https://ai.szfiu.com/stock_hk_sdk/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockUsSdk": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_us_sdk/",
+            "url": "https://ai.szfiu.com/stock_us_sdk/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockCnSdk": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/stock_cn_sdk/",
+            "url": "https://ai.szfiu.com/stock_cn_sdk/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "szfiuToolkit": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/toolkit/"
+            "url": "https://ai.szfiu.com/toolkit/"
         }
     }
 }
@@ -305,49 +305,49 @@ Query A-share market data, including:
     "mcpServers": {
         "stockHkF10SSE": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/sse/stock_hk_f10/",
+            "url": "https://ai.szfiu.com/sse/stock_hk_f10/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockUsF10SSE": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/sse/stock_us_f10/",
+            "url": "https://ai.szfiu.com/sse/stock_us_f10/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockCnF10SSE": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/sse/stock_cn_f10/",
+            "url": "https://ai.szfiu.com/sse/stock_cn_f10/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockHkSdkSSE": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/sse/stock_hk_sdk/",
+            "url": "https://ai.szfiu.com/sse/stock_hk_sdk/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockUsSdkSSE": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/sse/stock_us_sdk/",
+            "url": "https://ai.szfiu.com/sse/stock_us_sdk/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "stockCnSdkSSE": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/sse/stock_cn_sdk/",
+            "url": "https://ai.szfiu.com/sse/stock_cn_sdk/",
             "headers": {
                 "Authorization": "Bearer {api_key}"
             }
         },
         "szfiuToolkitSSE": {
             "transport": "streamable_http",
-            "url": "https://mcp.szfiu.com/sse/toolkit/"
+            "url": "https://ai.szfiu.com/sse/toolkit/"
         }
     }
 }
@@ -357,7 +357,7 @@ Query A-share market data, including:
 
 ## Authentication Token
 
-**Note**: You need to obtain your own JWT Token from https://mcp.szfiu.com/auth/login
+**Note**: You need to obtain your own JWT Token from https://ai.szfiu.com/auth/login
 
 ```bash
 export FIU_MCP_TOKEN="your_jwt_token_here"
@@ -370,7 +370,7 @@ export FIU_MCP_TOKEN="your_jwt_token_here"
 ### Query HK Stock Quote
 
 ```bash
-curl -X POST https://mcp.szfiu.com/stock_hk_sdk/ \
+curl -X POST https://ai.szfiu.com/stock_hk_sdk/ \
   -H "Authorization: Bearer {api_key}" \
   -H "Content-Type: application/json" \
   -d '{"tool": "quote", "params": {"symbol": "00700.HK"}}'
@@ -379,7 +379,7 @@ curl -X POST https://mcp.szfiu.com/stock_hk_sdk/ \
 ### Query Company Financials
 
 ```bash
-curl -X POST https://mcp.szfiu.com/stock_hk_f10/ \
+curl -X POST https://ai.szfiu.com/stock_hk_f10/ \
   -H "Authorization: Bearer {api_key}" \
   -H "Content-Type: application/json" \
   -d '{"tool": "financials", "params": {"symbol": "00700.HK"}}'
@@ -388,7 +388,7 @@ curl -X POST https://mcp.szfiu.com/stock_hk_f10/ \
 ### Search Securities Code
 
 ```bash
-curl -X POST https://mcp.szfiu.com/toolkit/ \
+curl -X POST https://ai.szfiu.com/toolkit/ \
   -H "Content-Type: application/json" \
   -d '{"tool": "search", "params": {"keyword": "Tencent"}}'
 ```
@@ -406,5 +406,5 @@ curl -X POST https://mcp.szfiu.com/toolkit/ \
 
 ## Related Links
 
-- [FIU MCP Official Docs](https://mcp.szfiu.com)
+- [FIU MCP Official Docs](https://ai.szfiu.com)
 - [GitHub Repository](https://github.com/fiu-ai/openclaw-skills)

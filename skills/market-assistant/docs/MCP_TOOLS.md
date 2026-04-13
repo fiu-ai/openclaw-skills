@@ -54,7 +54,7 @@ Tool names may differ between markets. Below are the confirmed tool names.
 Use this command to list all available tools for a market:
 
 ```bash
-curl -s -X POST https://mcp.szfiu.com/stock_hk_sdk/ \
+curl -s -X POST https://ai.szfiu.com/stock_hk_sdk/ \
   -H "Authorization: Bearer $FIU_MCP_TOKEN" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
@@ -62,12 +62,12 @@ curl -s -X POST https://mcp.szfiu.com/stock_hk_sdk/ \
 ```
 
 Replace the endpoint URL for other markets:
-- `https://mcp.szfiu.com/stock_us_sdk/`
-- `https://mcp.szfiu.com/stock_cn_sdk/`
-- `https://mcp.szfiu.com/stock_hk_f10/`
-- `https://mcp.szfiu.com/stock_us_f10/`
-- `https://mcp.szfiu.com/stock_cn_f10/`
-- `https://mcp.szfiu.com/toolkit/`
+- `https://ai.szfiu.com/stock_us_sdk/`
+- `https://ai.szfiu.com/stock_cn_sdk/`
+- `https://ai.szfiu.com/stock_hk_f10/`
+- `https://ai.szfiu.com/stock_us_f10/`
+- `https://ai.szfiu.com/stock_cn_f10/`
+- `https://ai.szfiu.com/toolkit/`
 
 ## Usage Examples
 

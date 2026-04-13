@@ -157,7 +157,7 @@ FIU MCP Server 使用 JSON-RPC 2.0 协议，请求格式如下：
 
 ### Q: 如何获取 API Token？
 
-A: 联系 FIU 官方获取 JWT Token，或访问 https://mcp.szfiu.com 注册账号。
+A: 联系 FIU 官方获取 JWT Token，或访问 https://ai.szfiu.com 注册账号。
 
 ### Q: 交易是实盘还是模拟？
 
@@ -205,7 +205,7 @@ if [ -z "$TOKEN" ]; then
     exit 1
 fi
 
-curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
+curl -s -X POST "https://ai.szfiu.com/stock_hk_sdk/" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json, text/event-stream" \
@@ -224,7 +224,7 @@ curl -s -X POST "https://mcp.szfiu.com/stock_hk_sdk/" \
 
 ## 相关资源
 
-- [FIU MCP 官方文档](https://mcp.szfiu.com)
+- [FIU MCP 官方文档](https://ai.szfiu.com)
 - [GitHub 仓库](https://github.com/fiu-ai/openclaw-skills)
 - [OpenClaw 文档](https://docs.openclaw.ai)
 - [JSON-RPC 2.0 规范](https://www.jsonrpc.org/specification)

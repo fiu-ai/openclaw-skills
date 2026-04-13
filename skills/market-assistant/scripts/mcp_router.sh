@@ -43,13 +43,13 @@ EOF
 
 # MCP Server 端点映射
 declare -A ENDPOINTS=(
-    ["hk_f10"]="https://mcp.szfiu.com/stock_hk_f10/"
-    ["us_f10"]="https://mcp.szfiu.com/stock_us_f10/"
-    ["cn_f10"]="https://mcp.szfiu.com/stock_cn_f10/"
-    ["hk_sdk"]="https://mcp.szfiu.com/stock_hk_sdk/"
-    ["us_sdk"]="https://mcp.szfiu.com/stock_us_sdk/"
-    ["cn_sdk"]="https://mcp.szfiu.com/stock_cn_sdk/"
-    ["toolkit"]="https://mcp.szfiu.com/toolkit/"
+    ["hk_f10"]="https://ai.szfiu.com/stock_hk_f10/"
+    ["us_f10"]="https://ai.szfiu.com/stock_us_f10/"
+    ["cn_f10"]="https://ai.szfiu.com/stock_cn_f10/"
+    ["hk_sdk"]="https://ai.szfiu.com/stock_hk_sdk/"
+    ["us_sdk"]="https://ai.szfiu.com/stock_us_sdk/"
+    ["cn_sdk"]="https://ai.szfiu.com/stock_cn_sdk/"
+    ["toolkit"]="https://ai.szfiu.com/toolkit/"
 )
 
 # 检查参数
