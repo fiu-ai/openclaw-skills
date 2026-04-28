@@ -1,193 +1,237 @@
-# FIU MCP Server OpenClaw Skills
+# FIU MCP Server — OpenClaw Skills
 
-[中文](README_CN.md) | [English](README.md)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![ClawHub](https://img.shields.io/badge/ClawHub-fi--market--assistant-purple)](https://clawhub.ai/ulnit/fiu-market-assistant)
+[![Markets](https://img.shields.io/badge/Markets-A%E8%82%A1%20%7C%20%E6%B8%AF%E8%82%A1%20%7C%20%E7%BE%8E%E8%82%A1-orange)](#features)
 
-## Overview
+> OpenClaw skills for FIU MCP Server — query A-share, HK, and US market data through natural language.
 
-This project provides OpenClaw skills for interacting with SZFIU MCP Server, enabling AI assistants to access market data and trading capabilities through natural language.
+[中文文档](#中文快速开始) | [English Quick Start](#english-quick-start) | [ClawHub](https://clawhub.ai/ulnit/fiu-market-assistant) | [FIU MCP Docs](https://ai.szfiu.com)
 
-## Install from ClawHub
+---
 
-The **fiu-market-assistant** skill is available on ClawHub:
+## ✨ Features
 
-👉 [fiu-market-assistant on ClawHub](https://clawhub.ai/ulnit/fiu-market-assistant)
+- **🗣️ Natural Language** — Ask questions in plain English or Chinese
+- **🌏 Three Markets** — A-share, HK, US stock data in one skill
+- **📊 Rich Data** — Quotes, K-line, capital flow, order book, rankings
+- **💹 Trading Support** — Place simulated orders, check positions & cash
+- **🔀 Universal Router** — One script (`mcp_router.sh`) to call all FIU MCP APIs
+- **📦 ClawHub Ready** — One-line install from ClawHub registry
 
-### CLI Installation
+---
+
+## English Quick Start
+
+### Install
 
 ```bash
 npx clawhub@latest install fiu-market-assistant
 ```
 
-Install a specific version:
-
-```bash
-npx clawhub@latest install fiu-market-assistant@1.0.3
-```
-
-### Manual Installation
-
-Copy the skill folder to OpenClaw workspace (highest priority, overrides global skills):
-
-```bash
-cp -r skills/market-assistant ~/.openclaw/workspace/skills/
-```
-
-### Install via WebUI
-
-1. Open OpenClaw WebUI, go to **Skills** management
-2. Select **Local → Skills → Configure**, browse pre-installed skills
-3. Select the skill with space key, confirm to install
-
-### Verify Installation
-
-```bash
-npx clawhub@latest list
-```
-
-Or check `SKILL.md` for usage and version info.
-
-## Quick Start
-
-> **Tip:** Update OpenClaw to the latest version before installing to avoid runtime conflicts.
-
-### One-Command Setup
-
-After installation, simply run:
+### Setup
 
 ```bash
 /fiu-market-assistant setup YOUR_FIU_MCP_TOKEN
 ```
 
-Then ask naturally:
+### Use
+
+Just ask naturally:
 
 ```
 Query Tencent Holdings quote
 Show AAPL daily K-line
-Buy 100 shares Tencent
+What's the capital flow for 00700?
 ```
+
+---
+
+## 中文快速开始
+
+### 安装
+
+```bash
+npx clawhub@latest install fiu-market-assistant
+```
+
+### 配置
+
+```bash
+/fiu-market-assistant setup 你的FIU_MCP_TOKEN
+```
+
+### 使用
+
+直接用自然语言提问：
+
+```
+查询腾讯控股行情
+显示 AAPL 日线K线
+00700 的资金流向如何？
+```
+
+---
+
+## Installation Methods
+
+### 1. ClawHub (Recommended)
+
+```bash
+# Latest version
+npx clawhub@latest install fiu-market-assistant
+
+# Specific version
+npx clawhub@latest install fiu-market-assistant@1.0.3
+
+# Verify installation
+npx clawhub@latest list
+```
+
+### 2. Manual Install
+
+Copy the skill folder to your OpenClaw workspace (highest priority, overrides global skills):
+
+```bash
+cp -r skills/market-assistant ~/.openclaw/workspace/skills/
+```
+
+### 3. WebUI Install
+
+1. Open OpenClaw WebUI → **Skills** management
+2. Select **Local → Skills → Configure**
+3. Browse pre-installed skills, select with space key, confirm to install
+
+> 💡 **Tip:** Update OpenClaw to the latest version before installing to avoid runtime conflicts.
+
+---
 
 ## Available Commands
 
-### Setup & Config
+### Setup & Diagnostics
 
-```bash
-/fiu-market-assistant setup <token>    # Quick setup with token
-/fiu-market-assistant test             # Test connectivity
-/fiu-market-assistant status           # Show status
-```
+| Command | Description |
+|---------|-------------|
+| `/fiu-market-assistant setup <token>` | Quick setup with JWT token |
+| `/fiu-market-assistant test` | Test connectivity to FIU MCP |
+| `/fiu-market-assistant status` | Show current configuration status |
 
 ### Data Query
 
-```bash
-/fiu-market-assistant discover hk_sdk   # Discover available tools
-/fiu-market-assistant discover cn_sdk
-/fiu-market-assistant quote 00700       # Query quote
-/fiu-market-assistant quote AAPL
-/fiu-market-assistant kline 00700       # Query K-line
-/fiu-market-assistant search 腾讯        # Search stock code
-/fiu-market-assistant capflow 00700     # Capital flow
-```
+| Command | Description |
+|---------|-------------|
+| `/fiu-market-assistant discover <market>` | List available tools for a market |
+| `/fiu-market-assistant quote <code>` | Query real-time quote |
+| `/fiu-market-assistant kline <code>` | Query K-line chart data |
+| `/fiu-market-assistant search <keyword>` | Search stock code by name |
+| `/fiu-market-assistant capflow <code>` | Query capital flow |
 
-### Trading
+### Trading (SIMULATE Mode)
 
-```bash
-/fiu-market-assistant trade buy 00700 100 380   # Buy (SIMULATE mode)
-/fiu-market-assistant positions                  # Query positions
-/fiu-market-assistant cash                       # Query cash
-/fiu-market-assistant orders                     # Query orders
-```
+| Command | Description |
+|---------|-------------|
+| `/fiu-market-assistant trade buy <code> <qty> <price>` | Place buy order |
+| `/fiu-market-assistant positions` | Query current positions |
+| `/fiu-market-assistant cash` | Query available cash |
+| `/fiu-market-assistant orders` | Query order history |
 
-## Features
+---
 
-- **Universal MCP Router**: Call all FIU MCP APIs via `mcp_router.sh`
-- **CLI Dispatch**: Easy command-line style queries
-- **Natural Language**: Simply ask questions in plain English/Chinese
-- **Multiple Markets**: HK, US, CN stock markets
-- **Real-time Data**: Quotes, K-line, order book, capital flow
-- **Trading**: Place orders (default SIMULATE mode)
+## MCP Router
 
-## MCP Router Usage
+The `mcp_router.sh` script provides a unified interface to all FIU MCP APIs:
 
 ```bash
 # Basic usage
 mcp_router.sh <market> <tool_name> [parameters...]
-mcp_router.sh --list-tools <market>  # List available tools
 
-# Markets: hk_f10, us_f10, cn_f10, hk_sdk, us_sdk, cn_sdk, toolkit
+# List available tools for a market
+mcp_router.sh --list-tools <market>
+```
 
-# Examples
+**Supported markets:** `hk_f10`, `us_f10`, `cn_f10`, `hk_sdk`, `us_sdk`, `cn_sdk`, `toolkit`
+
+**Examples:**
+
+```bash
+# Query HK quote
 mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot symbol=00700.HK
+
+# Query K-line
 mcp_router.sh hk_sdk post_v3_chart_kline_list symbol=00700.HK type=0
+
+# Search stock code
 mcp_router.sh toolkit search key=腾讯
 ```
 
-**Note**: Tool names may differ between markets. Use `mcp_router.sh --list-tools <market>` to discover exact tool names.
+> ⚠️ Tool names may differ between markets. Always use `--list-tools` to discover exact names.
 
-## MCP Servers
+---
 
-| Server | Description | Endpoint |
-|--------|-------------|----------|
-| stockHkF10 | HK Market F10 Data | `https://ai.szfiu.com/stock_hk_f10/` |
-| stockUsF10 | US Market F10 Data | `https://ai.szfiu.com/stock_us_f10/` |
-| stockCnF10 | A-Share Market F10 Data | `https://ai.szfiu.com/stock_cn_f10/` |
-| stockHkSdk | HK Market SDK Data | `https://ai.szfiu.com/stock_hk_sdk/` |
-| stockUsSdk | US Market SDK Data | `https://ai.szfiu.com/stock_us_sdk/` |
-| stockCnSdk | A-Share Market SDK Data | `https://ai.szfiu.com/stock_cn_sdk/` |
-| szfiuToolkit | Securities Code Lookup | `https://ai.szfiu.com/toolkit/` |
+## MCP Servers Reference
 
-## Documentation
+| Server | Market | Description | Endpoint |
+|--------|--------|-------------|----------|
+| `stockCnF10` | A 股 | F10 fundamentals | `https://ai.szfiu.com/api/mcp/stock_cn_f10/` |
+| `stockHkF10` | 港股 | F10 fundamentals | `https://ai.szfiu.com/api/mcp/stock_hk_f10/` |
+| `stockUsF10` | 美股 | F10 fundamentals | `https://ai.szfiu.com/api/mcp/stock_us_f10/` |
+| `stockCnSdk` | A 股 | SDK deep data | `https://ai.szfiu.com/api/mcp/stock_cn_sdk/` |
+| `stockHkSdk` | 港股 | SDK deep data | `https://ai.szfiu.com/api/mcp/stock_hk_sdk/` |
+| `stockUsSdk` | 美股 | SDK deep data | `https://ai.szfiu.com/api/mcp/stock_us_sdk/` |
+| `szfiuToolkit` | All | Stock code lookup | `https://ai.szfiu.com/api/mcp/toolkit/` |
 
-- [MCP Interface Documentation (Chinese)](docs/mcp-interfaces_CN.md)
-- [MCP Interface Documentation (English)](docs/mcp-interfaces_EN.md)
-- [MCP Tools Reference](skills/market-assistant/docs/MCP_TOOLS.md) - Known tool mappings
+---
 
 ## Project Structure
 
 ```
 openclaw-skills/
-├── README.md
-├── README_CN.md
-├── USAGE.md
-├── USAGE_EN.md
-├── install.sh
-├── test.sh
+├── README.md                    # This file (English)
+├── README_CN.md                 # Chinese version
+├── USAGE.md / USAGE_EN.md       # Detailed usage guides
+├── install.sh                   # Quick setup script
+├── test.sh                      # Connectivity test
 ├── docs/
-│   ├── mcp-interfaces_CN.md
-│   └── mcp-interfaces_EN.md
+│   ├── mcp-interfaces_CN.md     # MCP interface docs (中文)
+│   └── mcp-interfaces_EN.md     # MCP interface docs (English)
 └── skills/
     └── market-assistant/
-        ├── SKILL.md          # English (default)
-        ├── SKILL_CN.md       # Chinese
-        ├── skill.json        # Skill manifest
-        ├── install.sh        # Quick setup script
+        ├── SKILL.md             # Skill definition (English)
+        ├── SKILL_CN.md          # Skill definition (中文)
+        ├── skill.json           # Skill manifest
+        ├── install.sh           # Skill-level setup
         ├── docs/
-        │   ├── MCP_TOOLS.md
+        │   ├── MCP_TOOLS.md     # Known tool mappings
         │   └── mcp-interfaces_*.md
         └── scripts/
-            ├── cli.sh         # Main dispatch script
-            ├── mcp_router.sh # Universal MCP Router
-            └── *.sh          # Individual scripts
+            ├── cli.sh           # Main dispatch script
+            ├── mcp_router.sh    # Universal MCP router
+            └── *.sh             # Individual tool scripts
 ```
 
-## Security Notice
+---
 
-This skill requires a FIU_MCP_TOKEN (JWT) to access the FIU MCP service. Please ensure:
+## 🔒 Security Notice
 
-1. Your token is obtained from a trusted source
-2. Use SIMULATE mode for testing before real trading
-3. Apply least-privilege principle to your token
+This skill requires a `FIU_MCP_TOKEN` (JWT) to access the FIU MCP service.
+
+1. Obtain your token only from [https://ai.szfiu.com](https://ai.szfiu.com)
+2. **Always use SIMULATE mode** for testing before real trading
+3. Apply the principle of least privilege to your token
 4. Monitor trading activity closely
 
-## License
+---
+
+## 📄 License
 
 MIT License
 
-## Contributing
+## 🤝 Contributing
 
-Contributions welcome! Please read our contributing guidelines before submitting PRs.
+Contributions are welcome! Please read our contributing guidelines before submitting PRs.
 
-## Support
+## 💬 Support
 
-- ClawHub: [fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
-- Documentation: [FIU MCP Docs](https://ai.szfiu.com)
-- Issues: [GitHub Issues](https://github.com/fiu-ai/openclaw-skills/issues)
+- **ClawHub:** [fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
+- **Documentation:** [FIU MCP Docs](https://ai.szfiu.com)
+- **Issues:** [GitHub Issues](https://github.com/fiu-ai/openclaw-skills/issues)
