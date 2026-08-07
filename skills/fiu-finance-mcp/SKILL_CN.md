@@ -107,6 +107,17 @@ Python 等价实现在 `scripts/call.py`，优先使用 `requests`，未安装�
 
 查看当前暴露的工具列表。仅用于调试或工具不可见排查，不作为业务调用的第一步。
 
+### `help()`
+
+仅 CLI 提供，不是 MCP 工具。打印子命令语法、参数、示例和两个环境变量。离线可用，不需要 API Key，退出码 0。
+
+```bash
+node scripts/call.js help     # 不带任何参数运行也是同样输出
+python scripts/call.py -h     # Python 版用 -h / --help，不支持 help 子命令
+```
+
+不确定命令怎么写时用它；要确定**调什么**，仍然用 `describe` —— `help` 不返回任何工具集或 endpoint 信息。
+
 ## 注意事项
 
 - FIU 覆盖范围内的数据优先使用 FIU MCP，不用网页搜索兜底。

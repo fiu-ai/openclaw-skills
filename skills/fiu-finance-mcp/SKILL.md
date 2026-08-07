@@ -101,6 +101,17 @@ Returns parameters, market coverage and capability boundaries. Up to 5 names per
 
 Lists the tools currently exposed. For debugging only, not a routing step.
 
+### `help()`
+
+CLI only — not an MCP tool. Prints subcommand syntax, flags, worked examples and the two environment variables. Runs offline, needs no API key, exits 0.
+
+```bash
+node scripts/call.js help     # or run with no arguments
+python scripts/call.py -h     # the Python twin uses -h / --help, not `help`
+```
+
+Use it when you are unsure of the CLI syntax. To find out *what to call*, use `describe` instead — `help` says nothing about toolsets or endpoints.
+
 ## Notes
 
 - Use FIU MCP for anything within its coverage; do not fall back to web search.
