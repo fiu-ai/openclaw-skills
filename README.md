@@ -1,226 +1,291 @@
-# FIU MCP Server — OpenClaw Skills
+# FIU Finance MCP — OpenClaw Skill
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![ClawHub](https://img.shields.io/badge/ClawHub-fi--market--assistant-purple)](https://clawhub.ai/ulnit/fiu-market-assistant)
-[![Markets](https://img.shields.io/badge/Markets-A%E8%82%A1%20%7C%20%E6%B8%AF%E8%82%A1%20%7C%20%E7%BE%8E%E8%82%A1-orange)](#features)
+[![Markets](https://img.shields.io/badge/Markets-HK%20%7C%20US%20%7C%20CN%20%7C%20IPO%20%7C%20JP-orange)](#markets)
 
-> OpenClaw skills for FIU MCP Server — query A-share, HK, and US market data through natural language.
+[中文文档](README_CN.md) | [Skill definition](skills/fiu-finance-mcp/SKILL_EN.md) | [FIU MCP](http://ai.szfiu.com)
 
-[中文文档](#中文快速开始) | [English Quick Start](#english-quick-start) | [ClawHub](https://clawhub.ai/ulnit/fiu-market-assistant) | [FIU MCP Docs](https://ai.szfiu.com)
+With an AI coding tool, you can query quotes, candlesticks, capital flow, fundamentals,
+shareholding, IPOs, bonds and news in plain language. This repo packages the FIU Finance MCP
+service as a skill so your agent can answer market questions directly.
 
 ---
 
 ## ✨ Features
 
-- **🗣️ Natural Language** — Ask questions in plain English or Chinese
-- **🌏 Three Markets** — A-share, HK, US stock data in one skill
-- **📊 Rich Data** — Quotes, K-line, capital flow, order book, rankings
-- **💹 Trading Support** — Place simulated orders, check positions & cash
-- **🔀 Universal Router** — One script (`mcp_router.sh`) to call all FIU MCP APIs
-- **📦 ClawHub Ready** — One-line install from ClawHub registry
+- 🗣 **Natural language** — ask in plain English or Chinese, no parameter wrangling
+- 🌏 **Five segments** — HK, US, A-share and JP markets plus new listings, in one skill
+- 📊 **Rich data** — quotes, K-line, capital flow, order book, rankings, fundamentals,
+  shareholding, IPOs, bonds, options and news
+- 🔀 **One CLI** — a single script (`call.js`, zero dependencies) reaches every FIU MCP tool
+- 🧭 **Self-describing** — `describe_tool` returns the live catalog, so the agent never guesses
+  a field name
+- 📦 **One-command install** — clone, run `install.sh`, set the API key
 
 ---
 
-## English Quick Start
+## Install the skill
 
-### Install
+### One-command install (recommended)
+
+Read and run the following block:
+
+```
+# Install the FIU Finance MCP skill
+
+Please run these steps:
+
+## Step 1: get the skill package
+
+git clone https://github.com/fiu-ai/openclaw-skills.git && cd openclaw-skills
+
+## Step 2: install
+
+Run ./install.sh to copy everything under skills/ into the global skills directory.
+
+## Step 3: configure the API key
+
+Tell the user to request an API key at http://ai.szfiu.com, then set:
+export FIU_MCP_GATEWAY_AUTHORIZATION="Bearer <API_KEY>"
+
+## Step 4: verify
+
+Run ./test.sh and confirm all five checks pass.
+```
+
+### Manual install
+
+| Scope | Target directory |
+|-------|------------------|
+| OpenClaw, global | `~/.openclaw/skills/` |
+| Claude Code, global | `~/.claude/skills/` |
+| Claude Code, this project only | `<project root>/.claude/skills/` |
 
 ```bash
-npx clawhub@latest install fiu-market-assistant
+cp -r skills/fiu-finance-mcp ~/.openclaw/skills/
 ```
 
-### Setup
+### Configure
+
+Request an API key at [http://ai.szfiu.com](http://ai.szfiu.com), then:
 
 ```bash
-/fiu-market-assistant setup YOUR_FIU_MCP_TOKEN
+export FIU_MCP_GATEWAY_AUTHORIZATION="Bearer YOUR_API_KEY"
 ```
 
-### Use
+| Variable | Required | Default |
+|----------|----------|---------|
+| `FIU_MCP_GATEWAY_AUTHORIZATION` | yes | — (`Bearer <API_KEY>`) |
+| `FIU_MCP_URL` | no | `http://ai.szfiu.com/api/mcp/v2` |
 
-Just ask naturally:
+Requires `node` and `bash`. `scripts/call.py` is a Python twin of `scripts/call.js` and takes
+the same arguments, except that it prints usage via `-h` / `--help` rather than a `help`
+subcommand.
 
+### Verify
+
+```bash
+./test.sh
 ```
-Query Tencent Holdings quote
-Show AAPL daily K-line
-What's the capital flow for 00700?
+
+Five checks — tool catalog, catalog lookup, and HK / US / CN / IPO / JP quotes.
+
+---
+
+## Capability
+
+| Capability | What you get | Markets |
+|------------|--------------|---------|
+| Snapshot quotes | Last price, change, turnover, market cap, valuation | HK US CN JP |
+| Security search | Look up stocks, ETFs, indices, funds, warrants, bonds by keyword | HK US CN JP |
+| Candlesticks | Minute to monthly K-line, forward / backward adjusted, latest bar | HK US CN JP |
+| Order book | Real-time bid / ask depth | HK US CN JP |
+| Tick trades | Tick-by-tick detail, trade history, trade statistics | HK US CN JP |
+| Intraday trend | Today's trend line and mini trend chart | HK US CN JP |
+| Capital flow | Inflow / outflow, order-size distribution, trailing N-day flow | HK US CN JP |
+| Market overview | Advance / decline distribution and market statistics | HK US CN JP |
+| Rankings | Stock, industry, ETF, IPO, broker and option rankings | HK US CN JP |
+| Industries & indices | Industry and index lists, constituents, sector membership | HK US CN JP |
+| Position cost | Cost range and chip movement distribution | HK US |
+| Company profile | Basic profile, management, extended profile | HK US CN |
+| Financial statements | Income, balance sheet, cash flow, key indicators | HK US CN |
+| Business & governance | Revenue breakdown, dividends, splits, buybacks, halts, AGMs | HK US CN |
+| Shareholding | Major and top-ten shareholders, holding changes | HK US CN |
+| Institutional holdings | Institutional holding detail and statistics | US |
+| Fund / broker holdings | Fund holdings, broker holdings, daily short selling | HK US |
+| Funds & ETFs | NAV, asset and sector allocation, ETF lists and constituents | HK US JP |
+| Stock Connect | Quota, net turnover, rankings, holding ratio | HK CN |
+| IPO | Calendar, offerings, underwriters, cornerstone investors, margin, rankings | HK US |
+| Options | OPRA chains, quotes, Greeks, overview, rankings | US |
+| Bonds | Bond search, profile, quotes, depth, rankings, yield curves | `GLOBAL` |
+| News | Search, semantic search, per-symbol, latest, detail, digest | HK US CN JP |
+| Reference data | ISIN / SEDOL / CIK / ADR, currency, symbol mapping, trading status, market hours | HK US CN JP |
+
+---
+
+## Markets
+
+| Code | Market | Symbols |
+|------|--------|---------|
+| `HK` | Hong Kong | `00700.hk`; also warrants / CBBCs |
+| `US` | United States | `AAPL.us`; also OPRA options |
+| `CN` | A-share (Shanghai / Shenzhen) | `600519.sh`, `000001.sz`, `300750.sz` |
+| `JP` | Japan | `6758.jp` |
+| `IPO` | New listings | `00668.hk` |
+
+`CN` is a gateway routing label, not a downstream `market` field — A-share downstreams take
+the board (`SH` / `SZ` / `ALL`) in `marketBoard`. Bond endpoints route through `market=GLOBAL`.
+
+---
+
+## Usage
+
+### Natural language
+
+Describe what you want and the agent picks the right call:
+
+- "Quote for Tencent 00700" — snapshot quote
+- "AAPL hourly K-line, last 30 bars" — candlesticks
+- "Kweichow Moutai capital flow today" — capital flow
+- "HK IPOs listed this week" — IPO listings
+- "Tencent's latest income statement" — financial statements
+
+### Command line
+
+Three subcommands, all under `skills/fiu-finance-mcp/`. Run them from that directory.
+
+```bash
+node scripts/call.js list                       # what the gateway exposes
+node scripts/call.js describe <names>           # catalog lookup, up to 5 names
+node scripts/call.js call <toolset> ...         # invoke an endpoint
+node scripts/call.js help
+```
+
+Flags: `--endpoint|-e <endpoint>`, `--param|-p key=value` (repeatable), `--url <url>`,
+`--raw`. `symbols` splits on commas into an array; `true`/`false`/`null`/numbers and
+`[...]`/`{...}` values are parsed, everything else stays a string. A gateway error goes to
+stderr with exit code 1.
+
+`call` also accepts the raw JSON form, which is easier to script:
+
+```bash
+node scripts/call.js call quote_spot '{"endpoint":"get_quote","params":{"market":"HK","assetType":"stock","symbols":["00700.hk"]}}'
+```
+
+### Tool Call Cheatsheet
+
+**Discovery**
+
+```bash
+node scripts/call.js list
+node scripts/call.js describe quote_spot,quote_kline,quote_intraday,market_flow,reference
+node scripts/call.js call describe_tool '{"toolNames":["quote_spot"],"detail":"params"}'
+```
+
+`describe_tool` is the entry point: `detail=summary` (default) to route, `detail=params` for
+fields and enums, `detail=full` for one endpoint when a call keeps failing. `toolNames` takes
+at most 5 entries.
+
+**Quotes and search**
+
+```bash
+node scripts/call.js call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
+node scripts/call.js call quote_spot -e get_quote -p market=US -p assetType=stock -p symbols=AAPL.us
+node scripts/call.js call quote_spot -e get_quote -p market=CN -p assetType=stock -p symbols=600519.sh
+node scripts/call.js call quote_spot -e get_quote -p market=JP -p assetType=stock -p symbols=6758.jp
+node scripts/call.js call quote_spot -e search_security -p market=HK -p keyword=腾讯 -p limit=5
+```
+
+**Intraday, K-line, capital flow**
+
+```bash
+node scripts/call.js call quote_kline    -e get_kline          -p market=US -p assetType=stock -p symbol=AAPL.us -p period=60m -p limit=10
+node scripts/call.js call quote_intraday -e get_orderbook      -p market=HK -p assetType=stock -p symbol=00700.hk
+node scripts/call.js call quote_intraday -e get_intraday_trend -p market=HK -p assetType=stock -p symbol=00700.hk
+node scripts/call.js call market_flow    -e get_capital_flow   -p market=HK -p symbol=00700.hk -p flowType=current
+```
+
+**Market structure and rankings**
+
+```bash
+node scripts/call.js call market_ranking       -e get_rankings           -p market=HK -p rankType=stock -p pageSize=5
+node scripts/call.js call market_overview      -e get_market_statistics  -p market=CN
+node scripts/call.js call market_structure     -e get_industry_data      -p market=HK -p industryType=list
+node scripts/call.js call market_structure     -e get_index_data         -p market=CN -p indexType=list
+node scripts/call.js call market_position_cost -e get_position_cost      -p market=HK -p symbol=00700.hk -p costType=range -p price=470
+```
+
+**Fundamentals and shareholding**
+
+```bash
+node scripts/call.js call f10_financials           -e get_financial_statement -p market=HK -p symbol=00700.hk  -p statementType=income
+node scripts/call.js call f10_profile              -e get_company_profile     -p market=CN -p symbol=600519.sh -p dataType=basic
+node scripts/call.js call f10_business_governance  -e get_company_action      -p market=HK -p symbol=00700.hk  -p actionType=dividends
+node scripts/call.js call shareholding_structure   -e get_shareholders        -p market=CN -p symbol=600519.sh -p holdingType=topten
+node scripts/call.js call shareholding_institution -e get_institution_holding -p market=US -p symbol=AAPL.us   -p holdingType=statistics
+node scripts/call.js call shareholding_fund_broker -e get_short_sell          -p market=HK -p symbol=00700.hk
+```
+
+**Funds, Stock Connect, IPO, derivatives, bonds**
+
+```bash
+node scripts/call.js call fund_etf             -e get_etf_data              -p market=HK -p dataType=list -p params='{"sortField":"changeRate","sortType":1}'
+node scripts/call.js call stock_connect        -e get_cn_stock_connect_data -p market=CN -p connectType=balance -p params='{"date":"2026-08-06","period":1}'
+node scripts/call.js call ipo                  -e get_hk_ipo_list           -p market=HK -p ipoType=listed
+node scripts/call.js call quote_derivatives_hk -e get_hk_warrant_catalog    -p market=HK -p warrantType=issuer
+node scripts/call.js call quote_us_options     -e get_us_option_chain       -p market=US -p optionType=expiration -p params='{"root":"AAPL"}'
+node scripts/call.js call bond_basic           -e search_bond               -p market=GLOBAL -p keyword=treasury
+node scripts/call.js call bond_analytics       -e get_bond_yield            -p market=GLOBAL -p bondType=codes
+```
+
+**News and reference**
+
+```bash
+node scripts/call.js call fiu_news  -e news_latest        -p market=HK -p limit=3
+node scripts/call.js call fiu_news  -e news_by_symbol     -p market=US -p symbol=AAPL.us -p limit=3
+node scripts/call.js call reference -e get_reference_data -p market=HK -p symbol=00700.hk -p referenceType=isin
+node scripts/call.js call reference -e get_trading_status -p market=US -p statusType=session
+node scripts/call.js call reference -e get_market_hours   -p market=US
 ```
 
 ---
 
-## 中文快速开始
-
-### 安装
-
-```bash
-npx clawhub@latest install fiu-market-assistant
-```
-
-### 配置
-
-```bash
-/fiu-market-assistant setup 你的FIU_MCP_TOKEN
-```
-
-### 使用
-
-直接用自然语言提问：
-
-```
-查询腾讯控股行情
-显示 AAPL 日线K线
-00700 的资金流向如何？
-```
-
----
-
-## Installation Methods
-
-### 1. ClawHub (Recommended)
-
-```bash
-# Latest version
-npx clawhub@latest install fiu-market-assistant
-
-# Specific version
-npx clawhub@latest install fiu-market-assistant@1.0.3
-
-# Verify installation
-npx clawhub@latest list
-```
-
-### 2. Manual Install
-
-Copy the skill folder to your OpenClaw workspace (highest priority, overrides global skills):
-
-```bash
-cp -r skills/market-assistant ~/.openclaw/workspace/skills/
-```
-
-### 3. WebUI Install
-
-1. Open OpenClaw WebUI → **Skills** management
-2. Select **Local → Skills → Configure**
-3. Browse pre-installed skills, select with space key, confirm to install
-
-> 💡 **Tip:** Update OpenClaw to the latest version before installing to avoid runtime conflicts.
-
----
-
-## Available Commands
-
-### Setup & Diagnostics
-
-| Command | Description |
-|---------|-------------|
-| `/fiu-market-assistant setup <token>` | Quick setup with JWT token |
-| `/fiu-market-assistant test` | Test connectivity to FIU MCP |
-| `/fiu-market-assistant status` | Show current configuration status |
-
-### Data Query
-
-| Command | Description |
-|---------|-------------|
-| `/fiu-market-assistant discover <market>` | List available tools for a market |
-| `/fiu-market-assistant quote <code>` | Query real-time quote |
-| `/fiu-market-assistant kline <code>` | Query K-line chart data |
-| `/fiu-market-assistant search <keyword>` | Search stock code by name |
-| `/fiu-market-assistant capflow <code>` | Query capital flow |
-
-### Trading (SIMULATE Mode)
-
-| Command | Description |
-|---------|-------------|
-| `/fiu-market-assistant trade buy <code> <qty> <price>` | Place buy order |
-| `/fiu-market-assistant positions` | Query current positions |
-| `/fiu-market-assistant cash` | Query available cash |
-| `/fiu-market-assistant orders` | Query order history |
-
----
-
-## MCP Router
-
-The `mcp_router.sh` script provides a unified interface to all FIU MCP APIs:
-
-```bash
-# Basic usage
-mcp_router.sh <market> <tool_name> [parameters...]
-
-# List available tools for a market
-mcp_router.sh --list-tools <market>
-```
-
-**Supported markets:** `hk_f10`, `us_f10`, `cn_f10`, `hk_sdk`, `us_sdk`, `cn_sdk`, `toolkit`
-
-**Examples:**
-
-```bash
-# Query HK quote
-mcp_router.sh hk_sdk post_v3_stock_quote fields=snapshot symbol=00700.HK
-
-# Query K-line
-mcp_router.sh hk_sdk post_v3_chart_kline_list symbol=00700.HK type=0
-
-# Search stock code
-mcp_router.sh toolkit search key=腾讯
-```
-
-> ⚠️ Tool names may differ between markets. Always use `--list-tools` to discover exact names.
-
----
-
-## MCP Servers Reference
-
-| Server | Market | Description | Endpoint |
-|--------|--------|-------------|----------|
-| `stockCnF10` | A 股 | F10 fundamentals | `https://ai.szfiu.com/api/mcp/stock_cn_f10/` |
-| `stockHkF10` | 港股 | F10 fundamentals | `https://ai.szfiu.com/api/mcp/stock_hk_f10/` |
-| `stockUsF10` | 美股 | F10 fundamentals | `https://ai.szfiu.com/api/mcp/stock_us_f10/` |
-| `stockCnSdk` | A 股 | SDK deep data | `https://ai.szfiu.com/api/mcp/stock_cn_sdk/` |
-| `stockHkSdk` | 港股 | SDK deep data | `https://ai.szfiu.com/api/mcp/stock_hk_sdk/` |
-| `stockUsSdk` | 美股 | SDK deep data | `https://ai.szfiu.com/api/mcp/stock_us_sdk/` |
-| `szfiuToolkit` | All | Stock code lookup | `https://ai.szfiu.com/api/mcp/toolkit/` |
-
----
-
-## Project Structure
+## Project structure
 
 ```
 openclaw-skills/
-├── README.md                    # This file (English)
-├── README_CN.md                 # Chinese version
-├── USAGE.md / USAGE_EN.md       # Detailed usage guides
-├── install.sh                   # Quick setup script
-├── test.sh                      # Connectivity test
+├── README.md                      # This file (English)
+├── README_CN.md                   # Chinese version
+├── USAGE.md / USAGE_EN.md         # Detailed usage guides
+├── install.sh                     # Installs every skill in skills/
+├── test.sh                        # Gateway connectivity test
 ├── docs/
-│   ├── mcp-interfaces_CN.md     # MCP interface docs (中文)
-│   └── mcp-interfaces_EN.md     # MCP interface docs (English)
+│   ├── mcp-interfaces_CN.md       # Gateway interface reference (中文)
+│   └── mcp-interfaces_EN.md       # Gateway interface reference (English)
 └── skills/
-    └── market-assistant/
-        ├── SKILL.md             # Skill definition (English)
-        ├── SKILL_CN.md          # Skill definition (中文)
-        ├── skill.json           # Skill manifest
-        ├── install.sh           # Skill-level setup
-        ├── docs/
-        │   ├── MCP_TOOLS.md     # Known tool mappings
-        │   └── mcp-interfaces_*.md
+    └── fiu-finance-mcp/
+        ├── SKILL.md               # Skill definition (Chinese)
+        ├── SKILL_EN.md            # Skill definition (English)
+        ├── skill.json             # Skill manifest
+        ├── install.sh             # Skill-level install
+        ├── references/
+        │   ├── toolsets.md        # Toolset selection & market coverage
+        │   ├── setup-and-auth.md  # API key and connection
+        │   ├── examples.md        # Sample calls and prompts
+        │   └── troubleshooting.md # 401, validation errors, timeouts
         └── scripts/
-            ├── cli.sh           # Main dispatch script
-            ├── mcp_router.sh    # Universal MCP router
-            └── *.sh             # Individual tool scripts
+            ├── call.js            # CLI (Node, no dependencies)
+            └── call.py            # Same CLI in Python
 ```
 
 ---
 
-## 🔒 Security Notice
+## 🔒 Security notice
 
-This skill requires a `FIU_MCP_TOKEN` (JWT) to access the FIU MCP service.
-
-1. Obtain your token only from [https://ai.szfiu.com](https://ai.szfiu.com)
-2. **Always use SIMULATE mode** for testing before real trading
-3. Apply the principle of least privilege to your token
-4. Monitor trading activity closely
-
----
+- Get your API key only from [http://ai.szfiu.com](http://ai.szfiu.com).
+- Pass it via `FIU_MCP_GATEWAY_AUTHORIZATION`; never put it in `params`, in a script, or in a
+  commit.
+- Apply least privilege to the key and rotate it if it is ever printed to a log or terminal.
 
 ## 📄 License
 
@@ -228,10 +293,9 @@ MIT License
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
+Contributions are welcome. Please read the contributing guidelines before submitting PRs.
 
 ## 💬 Support
 
-- **ClawHub:** [fiu-market-assistant](https://clawhub.ai/ulnit/fiu-market-assistant)
-- **Documentation:** [FIU MCP Docs](https://ai.szfiu.com)
+- **Documentation:** [FIU MCP](http://ai.szfiu.com)
 - **Issues:** [GitHub Issues](https://github.com/fiu-ai/openclaw-skills/issues)
