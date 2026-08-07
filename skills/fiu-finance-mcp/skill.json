@@ -1,0 +1,41 @@
+{
+  "name": "fiu-finance-mcp",
+  "version": "2.0.0",
+  "description": "FIU Finance MCP assistant — quotes, order book, K-line, fundamentals, shareholding, IPO, ETF, bonds, US options, news and reference data for HK, US, A-share, Japan and global fixed income.",
+  "homepage": "http://ai.szfiu.com",
+  "source": "https://github.com/fiu-ai/openclaw-skills",
+  "author": "FIU AI",
+  "license": "MIT",
+  "keywords": [
+    "finance",
+    "market-data",
+    "mcp",
+    "stock",
+    "hongkong",
+    "us-stock",
+    "a-share",
+    "ipo",
+    "etf",
+    "bond",
+    "options"
+  ],
+  "entrypoint": "SKILL.md",
+  "localizedEntrypoints": {
+    "zh-CN": "SKILL_CN.md"
+  },
+  "requiredEnvVars": [
+    {
+      "name": "FIU_MCP_GATEWAY_AUTHORIZATION",
+      "description": "Authorization header value for the FIU MCP gateway, in the form 'Bearer <API_KEY>'. Get an API key at http://ai.szfiu.com."
+    }
+  ],
+  "optionalEnvVars": [
+    {
+      "name": "FIU_MCP_URL",
+      "description": "Override the MCP endpoint. Defaults to http://ai.szfiu.com/api/mcp/v2."
+    }
+  ],
+  "requires": {
+    "binaries": ["node", "bash"]
+  }
+}

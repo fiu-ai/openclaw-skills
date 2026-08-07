@@ -1,230 +1,201 @@
-# FIU MCP Skills 使用指南
+# FIU Finance MCP 使用指南
+
+面向 FIU MCP 网关 `http://ai.szfiu.com/api/mcp/v2` 的技能 `fiu-finance-mcp`。
 
 ## 快速开始
 
-### 1. 安装 Skills
+### 1. 安装技能
 
 ```bash
-# 克隆仓库
 git clone git@github.com:fiu-ai/openclaw-skills.git
-cd fiu-mcp-skills
-
-# 运行安装脚本
+cd openclaw-skills
 ./install.sh
 ```
 
-或者手动安装：
+或者只装这一个技能：
 
 ```bash
-cp -r skills/* ~/.openclaw/skills/
+./skills/fiu-finance-mcp/install.sh
+# 或
+cp -r skills/fiu-finance-mcp ~/.openclaw/skills/
 ```
 
-### 2. 配置 API Token
+### 2. 配置 API Key
+
+在 [http://ai.szfiu.com](http://ai.szfiu.com) 申请，然后写进 `~/.zshrc` 或 `~/.bashrc`：
 
 ```bash
-# 添加到 ~/.zshrc 或 ~/.bashrc
-export FIU_MCP_TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+export FIU_MCP_GATEWAY_AUTHORIZATION="Bearer YOUR_API_KEY"
+# 可选：覆盖端点
+# export FIU_MCP_URL="http://ai.szfiu.com/api/mcp/v2"
 ```
 
-### 3. 验证安装
+### 3. 验证
 
-在 OpenClaw 中输入 `/` 查看技能列表，应该能看到 `market-assistant`。
+```bash
+./test.sh
+```
+
+五步自检：`tools/list`、`describe_tool`、港股 / 美股 / A 股行情。全通过输出 `✅ 测试完成，全部通过`。
+
+在 OpenClaw 中输入 `/` 查看技能列表，应该能看到 `fiu-finance-mcp`。
 
 ## 使用方式
 
 ### 在 OpenClaw 中使用
 
-安装后，可以直接在 OpenClaw 对话中使用自然语言调用：
-
 ```
 查询腾讯控股的实时行情
-显示 AAPL 的 K 线数据
-腾讯的资金流向如何
-用模拟账户买入 100 股腾讯
-查询我的持仓
+显示 AAPL 的小时 K 线
+贵州茅台今天的资金流向
+美股现在是不是开盘时段
+本周港股新上市的新股有哪些
 ```
 
-### 使用命令行脚本
-
-技能目录中的脚本也可以独立使用：
+### 使用命令行
 
 ```bash
-# 设置环境变量
-export FIU_MCP_TOKEN="your_token_here"
+cd ~/.openclaw/skills/fiu-finance-mcp
 
-# 查询行情
-cd ~/.openclaw/skills/market-assistant/scripts
-./quote.sh 00700.HK HK
-
-# 查询 K 线
-./kline.sh 00700.HK D 100
-
-# 查询资金流向
-./capital.sh 00700.HK
-
-# 交易下单（模拟环境）
-./trade.sh buy 00700.HK 100 350.5 SIMULATE
-
-# 查询持仓
-./positions.sh SIMULATE
-
-# 查询资金
-./cash.sh SIMULATE
-
-# 检索证券代码
-./search.sh 腾讯
+node scripts/call.js list
+node scripts/call.js describe quote_spot,quote_kline
+node scripts/call.js call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
 ```
 
-## MCP 协议说明
+Python 版参数完全一致：
 
-FIU MCP Server 使用 JSON-RPC 2.0 协议，请求格式如下：
+```bash
+python scripts/call.py call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
+```
+
+更多可复制的示例见 [README_CN.md 的「工具调用速查」](README_CN.md#工具调用速查)。
+
+## 调用约定
+
+网关是 Streamable HTTP + JSON-RPC 2.0，请求头带 `Authorization: Bearer <API_KEY>`。
+`call.js` 已经封装了 `initialize` → `notifications/initialized` → `tools/call` 的握手和 SSE 解析，
+一般不需要自己拼请求。
+
+每个业务工具都是**工具集**，只接受两个参数：
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "tool_name",
-    "arguments": {
-      "key": "value"
-    }
-  }
+  "endpoint": "get_quote",
+  "params": { "market": "HK", "assetType": "stock", "symbols": ["00700.hk"] }
 }
 ```
 
-响应格式：
+对应到 CLI：
 
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "响应内容"
-      }
-    ],
-    "isError": false
-  }
-}
+```bash
+node scripts/call.js call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
+# 等价于
+node scripts/call.js call quote_spot '{"endpoint":"get_quote","params":{"market":"HK","assetType":"stock","symbols":["00700.hk"]}}'
 ```
 
-## 可用工具列表
+### `-p` 取值规则
 
-### 行情查询工具
+| 写法 | 结果 |
+|------|------|
+| `-p symbols=00700.hk,AAPL.us` | `["00700.hk","AAPL.us"]`（`symbols` 总是拆成数组） |
+| `-p limit=30` | 数字 `30` |
+| `-p conceptFlag=Y` | 字符串 `"Y"` |
+| `-p timeMode=true` | 布尔 `true` |
+| `-p params='{"sortField":"changeRate"}'` | 对象，透传给下游 |
 
-| 工具名 | 描述 | 参数 |
+## 可用工具
+
+24 个工具、86 个 endpoint，覆盖港股、美股、A 股、日股，债券走 `GLOBAL` 路由。
+完整目录见 [README_CN.md 的「功能一览」](README_CN.md#功能一览)，权威来源始终是网关自己：
+
+```bash
+node scripts/call.js list
+node scripts/call.js call describe_tool '{"toolNames":["quote_spot"],"detail":"params"}'
+```
+
+`describe_tool` 分三档：
+
+| detail | 用途 | 限制 |
 |--------|------|------|
-| `quote` | 市场快照 | `symbol` (股票代码) |
-| `kline` | K 线数据 | `symbol`, `period`, `count` |
-| `orderbook` | 买卖盘口 | `symbol` |
-| `deal` | 逐笔成交 | `symbol` |
-| `time_slice` | 分时数据 | `symbol` |
-| `market_status` | 市场状态 | `market` (HK/US/CN) |
-| `capital_flow` | 资金流向 | `symbol` |
-| `capital_distribution` | 资金分布 | `symbol` |
-
-### 交易工具
-
-| 工具名 | 描述 | 参数 |
-|--------|------|------|
-| `place_order` | 下单 | `symbol`, `action`, `qty`, `price`, `order_type`, `environment` |
-| `cancel_order` | 撤单 | `order_id`, `environment` |
-| `modify_order` | 改单 | `order_id`, `price`, `qty`, `environment` |
-| `positions` | 持仓查询 | `environment` |
-| `cash` | 资金查询 | `environment` |
-| `orders` | 订单查询 | `environment`, `status` |
-
-### 市场数据工具
-
-| 工具名 | 描述 | 参数 |
-|--------|------|------|
-| `sectors` | 板块列表 | `market` |
-| `sector_stocks` | 板块成分股 | `sector_id` |
-| `stock_sectors` | 股票所属板块 | `symbol` |
-| `screen_stocks` | 条件选股 | `conditions` |
-| `rankings` | 排行榜 | `type`, `market` |
-
-### 工具类
-
-| 工具名 | 描述 | 参数 |
-|--------|------|------|
-| `search` | 证券代码检索 | `keyword` |
+| `summary`（默认） | 选工具集、看市场覆盖 | 一次最多 5 个名字 |
+| `params` | 查字段名、必填项、枚举值 | 一次最多 5 个名字 |
+| `full` | 单个 endpoint 反复调不通时排障 | 一次 1 个 endpoint |
 
 ## 常见问题
 
-### Q: 如何获取 API Token？
+### Q: 如何获取 API Key？
 
-A: 联系 FIU 官方获取 JWT Token，或访问 https://ai.szfiu.com 注册账号。
+A: 访问 [http://ai.szfiu.com](http://ai.szfiu.com) 申请，配置到
+`FIU_MCP_GATEWAY_AUTHORIZATION="Bearer <API_KEY>"`。
 
-### Q: 交易是实盘还是模拟？
+### Q: 报 `INVALID_ARGUMENT` / `INVALID_SEMANTIC_INPUT` 怎么办？
 
-A: 默认使用模拟环境（SIMULATE）。如需实盘交易，必须：
-1. 明确指定 `environment: "REAL"`
-2. 进行二次确认
-3. 输入交易密码
+A: 说明网关语义层校验没过，多半是漏了区分字段（`dataType`、`holdingType`、`ipoType`、
+`connectType`、`costType`、`statementType` 等）。用 `describe_tool` 的 `detail=params` 查必填项。
 
-### Q: 遇到限频怎么办？
+### Q: 报 `INVALID_DOWNSTREAM_ARGS` 怎么办？
 
-A: 下单接口限频 15 次/30 秒。遇到限频请：
-1. 减少请求频率
-2. 实现指数退避重试
-3. 批量处理请求
+A: 语义层过了、下游还缺字段。错误体里的 `error.details.issues` 会逐条点名，例如：
 
-### Q: 订阅额度是多少？
+```
+sortField  下游 hk_sdk/post_v3_etf_list 需要字段 sortField
+period     下游 cn_sdk/post_v1_stockConnect_connectBalance 需要字段 period
+root       下游 us_options/post_opra_v1_chain_expiration 需要字段 root
+```
 
-A: 实时订阅额度为 100～2000，具体取决于账户等级。请定期释放不需要的订阅。
+补进 `-p params='{...}'` 重试即可。
+
+### Q: 报 `UNSUPPORTED_ROUTE` 怎么办？
+
+A: 这个 endpoint 在该市场没有下游路由。换市场，或用 `describe_tool` 看它实际支持哪些市场 ——
+工具级别标注的市场是并集，单个 endpoint 可能更窄。
 
 ### Q: 支持哪些市场？
 
-A: 目前支持：
-- 港股（HK）
-- 美股（US）
-- A 股（CN）
+A: `HK`（港股）、`US`（美股）、`CN`（A 股沪深）、`JP`（日股）。债券类接口走 `GLOBAL`。
+
+### Q: 代码怎么写？
+
+A: 带完整后缀 —— `00700.hk`、`AAPL.us`、`600519.sh`、`000001.sz`、`6758.jp`；债券可传 ISIN。
+日期用 `YYYY-MM-DD`；分钟 K 线、逐笔、分时这类需要精确时刻的用 `YYYY-MM-DD HH:mm:ss`。
+
+### Q: 批量查询有上限吗？
+
+A: 批量行情、财务、持股、新闻类查询建议控制在约 5 个标的或 5 个指标以内；`get_security_profile`
+的 `symbols` 上限是 50 个。
 
 ## 开发指南
 
-### 添加新的工具脚本
-
-1. 在 `skills/market-assistant/scripts/` 目录创建新脚本
-2. 使用 JSON-RPC 2.0 格式调用 API
-3. 解析 SSE 响应（使用 `grep "^data:"`）
-4. 添加执行权限：`chmod +x script.sh`
-
-### 示例脚本结构
+### 直接用 HTTP 调网关
 
 ```bash
-#!/bin/bash
-set -e
-
-TOKEN="${FIU_MCP_TOKEN:-}"
-if [ -z "$TOKEN" ]; then
-    echo "错误：请设置 FIU_MCP_TOKEN 环境变量"
-    exit 1
-fi
-
-curl -s -X POST "https://ai.szfiu.com/stock_hk_sdk/" \
-    -H "Authorization: Bearer $TOKEN" \
+curl -s -X POST "http://ai.szfiu.com/api/mcp/v2" \
+    -H "Authorization: Bearer $API_KEY" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json, text/event-stream" \
+    -H "Mcp-Protocol-Version: 2025-06-18" \
+    -H "Mcp-Session-Id: $SESSION_ID" \
     -d '{
         "jsonrpc": "2.0",
         "id": 1,
         "method": "tools/call",
         "params": {
-            "name": "tool_name",
+            "name": "quote_spot",
             "arguments": {
-                "key": "value"
+                "endpoint": "get_quote",
+                "params": {"market": "HK", "assetType": "stock", "symbols": ["00700.hk"]}
             }
         }
-    }" | grep "^data:" | sed 's/^data: //' | jq .
+    }'
 ```
+
+`SESSION_ID` 来自先前 `initialize` 请求响应头里的 `Mcp-Session-Id`，之后每个请求都要带上。
+响应是 SSE（CRLF 换行），取最后一条 `data:` 行再解析。这些细节 `call.js` 都处理好了，
+新写集成建议直接复用它。
 
 ## 相关资源
 
-- [FIU MCP 官方文档](https://ai.szfiu.com)
+- [FIU MCP 官方站点](http://ai.szfiu.com)
 - [GitHub 仓库](https://github.com/fiu-ai/openclaw-skills)
 - [OpenClaw 文档](https://docs.openclaw.ai)
 - [JSON-RPC 2.0 规范](https://www.jsonrpc.org/specification)

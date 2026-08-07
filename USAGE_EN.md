@@ -1,234 +1,214 @@
-# FIU MCP Skills Usage Guide
+# FIU Finance MCP Usage Guide
+
+Covers the `fiu-finance-mcp` skill, which talks to the FIU MCP gateway at
+`http://ai.szfiu.com/api/mcp/v2`.
 
 ## Quick Start
 
-### 1. Install Skills
+### 1. Install the skill
 
 ```bash
-# Clone repository
 git clone git@github.com:fiu-ai/openclaw-skills.git
-cd fiu-mcp-skills
-
-# Run installation script
+cd openclaw-skills
 ./install.sh
 ```
 
-Or manually:
+Or install just this skill:
 
 ```bash
-cp -r skills/* ~/.openclaw/skills/
+./skills/fiu-finance-mcp/install.sh
+# or
+cp -r skills/fiu-finance-mcp ~/.openclaw/skills/
 ```
 
-### 2. Configure API Token
+### 2. Configure the API key
+
+Get one at [http://ai.szfiu.com](http://ai.szfiu.com), then add it to `~/.zshrc` or `~/.bashrc`:
 
 ```bash
-# Add to ~/.zshrc or ~/.bashrc
-export FIU_MCP_TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+export FIU_MCP_GATEWAY_AUTHORIZATION="Bearer YOUR_API_KEY"
+# optional: override the endpoint
+# export FIU_MCP_URL="http://ai.szfiu.com/api/mcp/v2"
 ```
 
-### 3. Verify Installation
+### 3. Verify
 
-In OpenClaw, type `/` to see the skills list. You should see `market-assistant`.
+```bash
+./test.sh
+```
+
+Five checks: `tools/list`, `describe_tool`, and HK / US / CN quotes. All green prints
+`✅ 测试完成，全部通过`.
+
+In OpenClaw, type `/` to see the skills list — `fiu-finance-mcp` should be there.
 
 ## Usage
 
-### Using in OpenClaw
-
-After installation, you can use natural language in OpenClaw conversations:
+### In OpenClaw
 
 ```
 Query Tencent Holdings real-time quote
-Show AAPL K-line data
-What's the capital flow for Tencent
-Buy 100 shares of Tencent with simulation account
-Check my positions
+Show AAPL hourly K-line
+Capital flow for Kweichow Moutai today
+Is the US market in session right now
+Which HK IPOs listed this week
 ```
 
-### Using Command Line Scripts
-
-Scripts in the skill directory can also be used independently:
+### From the command line
 
 ```bash
-# Set environment variable
-export FIU_MCP_TOKEN="your_token_here"
+cd ~/.openclaw/skills/fiu-finance-mcp
 
-# Query quote
-cd ~/.openclaw/skills/market-assistant/scripts
-./quote.sh 00700.HK HK
-
-# Query K-line
-./kline.sh 00700.HK D 100
-
-# Query capital flow
-./capital.sh 00700.HK
-
-# Place order (simulation)
-./trade.sh buy 00700.HK 100 350.5 SIMULATE
-
-# Query positions
-./positions.sh SIMULATE
-
-# Query cash
-./cash.sh SIMULATE
-
-# Search securities code
-./search.sh Tencent
+node scripts/call.js list
+node scripts/call.js describe quote_spot,quote_kline
+node scripts/call.js call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
 ```
 
-## MCP Protocol
+The Python twin takes identical arguments:
 
-FIU MCP Server uses JSON-RPC 2.0 protocol. Request format:
+```bash
+python scripts/call.py call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
+```
+
+More copy-pasteable examples in
+[README.md → Tool Call Cheatsheet](README.md#tool-call-cheatsheet).
+
+## Calling convention
+
+The gateway is Streamable HTTP + JSON-RPC 2.0 with `Authorization: Bearer <API_KEY>`.
+`call.js` already handles the `initialize` → `notifications/initialized` → `tools/call`
+handshake and SSE parsing, so you rarely need to build requests yourself.
+
+Every business tool is a **toolset** and takes exactly two arguments:
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "tool_name",
-    "arguments": {
-      "key": "value"
-    }
-  }
+  "endpoint": "get_quote",
+  "params": { "market": "HK", "assetType": "stock", "symbols": ["00700.hk"] }
 }
 ```
 
-Response format:
+On the CLI:
 
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "Response content"
-      }
-    ],
-    "isError": false
-  }
-}
+```bash
+node scripts/call.js call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
+# equivalent to
+node scripts/call.js call quote_spot '{"endpoint":"get_quote","params":{"market":"HK","assetType":"stock","symbols":["00700.hk"]}}'
 ```
 
-## Available Tools
+### How `-p` values are parsed
 
-### Market Query Tools
+| Written as | Becomes |
+|------------|---------|
+| `-p symbols=00700.hk,AAPL.us` | `["00700.hk","AAPL.us"]` (`symbols` always splits into an array) |
+| `-p limit=30` | number `30` |
+| `-p conceptFlag=Y` | string `"Y"` |
+| `-p timeMode=true` | boolean `true` |
+| `-p params='{"sortField":"changeRate"}'` | object, passed through to the downstream |
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `quote` | Market snapshot | `symbol` |
-| `kline` | K-line data | `symbol`, `period`, `count` |
-| `orderbook` | Order book | `symbol` |
-| `deal` | Tick-by-tick deals | `symbol` |
-| `time_slice` | Time-sharing data | `symbol` |
-| `market_status` | Market status | `market` (HK/US/CN) |
-| `capital_flow` | Capital flow | `symbol` |
-| `capital_distribution` | Capital distribution | `symbol` |
+## Available tools
 
-### Trading Tools
+24 tools, 86 endpoints, five markets (`CN` / `HK` / `US` / `JP` / `GLOBAL`).
+Full catalog in [README.md → Capability](README.md#capability); the authoritative source
+is always the gateway itself:
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `place_order` | Place order | `symbol`, `action`, `qty`, `price`, `order_type`, `environment` |
-| `cancel_order` | Cancel order | `order_id`, `environment` |
-| `modify_order` | Modify order | `order_id`, `price`, `qty`, `environment` |
-| `positions` | Query positions | `environment` |
-| `cash` | Query cash | `environment` |
-| `orders` | Query orders | `environment`, `status` |
+```bash
+node scripts/call.js list
+node scripts/call.js call describe_tool '{"toolNames":["quote_spot"],"detail":"params"}'
+```
 
-### Market Data Tools
+`describe_tool` has three tiers:
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `sectors` | Sector list | `market` |
-| `sector_stocks` | Sector constituents | `sector_id` |
-| `stock_sectors` | Stock sectors | `symbol` |
-| `screen_stocks` | Stock screening | `conditions` |
-| `rankings` | Market rankings | `type`, `market` |
-
-### Utility Tools
-
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `search` | Securities code search | `keyword` |
+| detail | Use for | Limit |
+|--------|---------|-------|
+| `summary` (default) | Picking a toolset, checking market coverage | up to 5 names |
+| `params` | Field names, required flags, enum values | up to 5 names |
+| `full` | Debugging one endpoint that keeps failing | 1 endpoint |
 
 ## FAQ
 
-### Q: How to get API Token?
+### Q: How do I get an API key?
 
-A: Contact FIU official to get JWT Token, or register at https://ai.szfiu.com.
+A: Register at [http://ai.szfiu.com](http://ai.szfiu.com) and set
+`FIU_MCP_GATEWAY_AUTHORIZATION="Bearer <API_KEY>"`.
 
-### Q: Is trading real or simulation?
+### Q: I get `INVALID_ARGUMENT` / `INVALID_SEMANTIC_INPUT`
 
-A: Default is simulation environment (SIMULATE). For real trading:
-1. Must specify `environment: "REAL"`
-2. Secondary confirmation required
-3. Trading password required
+A: Gateway-level validation failed, usually a missing discriminator (`dataType`,
+`holdingType`, `ipoType`, `connectType`, `costType`, `statementType`, …). Check required
+fields with `describe_tool` at `detail=params`.
 
-### Q: What about rate limits?
+### Q: I get `INVALID_DOWNSTREAM_ARGS`
 
-A: Order placement limit is 15 requests/30 seconds. If rate limited:
-1. Reduce request frequency
-2. Implement exponential backoff retry
-3. Batch requests
+A: Validation passed but the downstream still wants fields. `error.details.issues` names each
+one, e.g.
 
-### Q: What's the subscription quota?
+```
+sortField  downstream hk_sdk/post_v3_etf_list requires sortField
+period     downstream cn_sdk/post_v1_stockConnect_connectBalance requires period
+root       downstream us_options/post_opra_v1_chain_expiration requires root
+```
 
-A: Real-time subscription quota is 100～2000, depending on account level. Release unused subscriptions regularly.
+Add them via `-p params='{...}'` and retry.
+
+### Q: I get `UNSUPPORTED_ROUTE`
+
+A: That endpoint has no downstream route for that market. Switch markets, or check
+`describe_tool` for what it actually supports — the market list on a tool is a union, and an
+individual endpoint can be narrower.
 
 ### Q: Which markets are supported?
 
-A: Currently supported:
-- HK Stock (HK)
-- US Stock (US)
-- A-Share (CN)
+A: `CN` (A-share), `HK` (Hong Kong), `US` (United States), `JP` (Japan), and `GLOBAL`
+(cross-market fixed income — **bonds only**, not for ordinary equities).
 
-## Development Guide
+### Q: What symbol format?
 
-### Adding New Tool Scripts
+A: Full suffixes — `00700.hk`, `AAPL.us`, `600519.sh`, `000001.sz`, `6758.jp`; bonds accept an
+ISIN. Dates are `YYYY-MM-DD`; minute K-line, ticks and intraday use `YYYY-MM-DD HH:mm:ss`.
 
-1. Create new script in `skills/market-assistant/scripts/`
-2. Use JSON-RPC 2.0 format to call API
-3. Parse SSE response (use `grep "^data:"`)
-4. Add execute permission: `chmod +x script.sh`
+### Q: Any batch limits?
 
-### Example Script Structure
+A: Keep batch quote, financial, holding and news queries to about 5 subjects or 5 metrics per
+call; `get_security_profile` caps `symbols` at 50.
+
+## Development
+
+### Calling the gateway over raw HTTP
 
 ```bash
-#!/bin/bash
-set -e
-
-TOKEN="${FIU_MCP_TOKEN:-}"
-if [ -z "$TOKEN" ]; then
-    echo "Error: Please set FIU_MCP_TOKEN environment variable"
-    exit 1
-fi
-
-curl -s -X POST "https://ai.szfiu.com/stock_hk_sdk/" \
-    -H "Authorization: Bearer $TOKEN" \
+curl -s -X POST "http://ai.szfiu.com/api/mcp/v2" \
+    -H "Authorization: Bearer $API_KEY" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json, text/event-stream" \
+    -H "Mcp-Protocol-Version: 2025-06-18" \
+    -H "Mcp-Session-Id: $SESSION_ID" \
     -d '{
         "jsonrpc": "2.0",
         "id": 1,
         "method": "tools/call",
         "params": {
-            "name": "tool_name",
+            "name": "quote_spot",
             "arguments": {
-                "key": "value"
+                "endpoint": "get_quote",
+                "params": {"market": "HK", "assetType": "stock", "symbols": ["00700.hk"]}
             }
         }
-    }" | grep "^data:" | sed 's/^data: //' | jq .
+    }'
 ```
+
+`SESSION_ID` comes from the `Mcp-Session-Id` response header of a prior `initialize` call and
+must be sent on every subsequent request. Responses are SSE with CRLF line endings — take the
+last `data:` line and parse it. `call.js` handles all of this; prefer reusing it for new
+integrations.
 
 ## Resources
 
-- [FIU MCP Official Docs](https://ai.szfiu.com)
-- [GitHub Repository](https://github.com/fiu-ai/openclaw-skills)
-- [OpenClaw Docs](https://docs.openclaw.ai)
-- [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+- [FIU MCP](http://ai.szfiu.com)
+- [GitHub repository](https://github.com/fiu-ai/openclaw-skills)
+- [OpenClaw docs](https://docs.openclaw.ai)
+- [JSON-RPC 2.0 specification](https://www.jsonrpc.org/specification)
 
 ## Support
 
-For issues, please submit a GitHub Issue or contact FIU support.
+For issues, please open a GitHub Issue or contact FIU support.
