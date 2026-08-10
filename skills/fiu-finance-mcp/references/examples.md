@@ -35,10 +35,10 @@
 // market_ranking —— 港股涨幅榜前 10
 { "endpoint": "get_rankings", "params": { "market": "HK", "rankType": "stock", "sortField": "changeRate", "sortType": 1, "pageSize": 10 } }
 
-// market_flow —— A股当前资金流
+// market_flow —— A股(中华通)当前资金流
 { "endpoint": "get_capital_flow", "params": { "market": "CN", "flowType": "current", "symbol": "600519.sh" } }
 
-// market_structure —— A股行业列表
+// market_structure —— A股(中华通)行业列表
 { "endpoint": "get_industry_data", "params": { "market": "CN", "industryType": "list" } }
 
 // market_position_cost —— 指定价位获利比例
@@ -56,7 +56,7 @@
 // f10_financials —— 港股年报利润表
 { "endpoint": "get_financial_statement", "params": { "market": "HK", "symbol": "00700.hk", "statementType": "income", "reportType": "F" } }
 
-// f10_financials —— A股年度资产负债表
+// f10_financials —— A股(中华通)年度资产负债表
 { "endpoint": "get_financial_statement", "params": { "market": "CN", "symbol": "600519.sh", "statementType": "balance", "reportType": 12 } }
 
 // f10_financials —— 财务指标

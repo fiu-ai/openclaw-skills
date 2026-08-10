@@ -1,7 +1,7 @@
 # FIU Finance MCP — OpenClaw Skill
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Markets](https://img.shields.io/badge/Markets-HK%20%7C%20US%20%7C%20CN%20%7C%20IPO%20%7C%20JP-orange)](#markets)
+[![Markets](<https://img.shields.io/badge/Markets-HK%20%7C%20US%20%7C%20CN%20%7C%20IPO%20%7C%20JP-orange>)](#markets)
 
 [中文文档](README_CN.md) | [Skill definition](skills/fiu-finance-mcp/SKILL_EN.md) | [FIU MCP](http://ai.szfiu.com)
 
@@ -14,7 +14,7 @@ service as a skill so your agent can answer market questions directly.
 ## ✨ Features
 
 - 🗣 **Natural language** — ask in plain English or Chinese, no parameter wrangling
-- 🌏 **Five segments** — HK, US, A-share and JP markets plus new listings, in one skill
+- 🌏 **Five segments** — HK, US, A-share(Zhcall) and JP markets plus new listings, in one skill
 - 📊 **Rich data** — quotes, K-line, capital flow, order book, rankings, fundamentals,
   shareholding, IPOs, bonds, options and news
 - 🔀 **One CLI** — a single script (`call.js`, zero dependencies) reaches every FIU MCP tool
@@ -55,10 +55,10 @@ Run ./test.sh and confirm all five checks pass.
 
 ### Manual install
 
-| Scope | Target directory |
-|-------|------------------|
-| OpenClaw, global | `~/.openclaw/skills/` |
-| Claude Code, global | `~/.claude/skills/` |
+| Scope                          | Target directory                   |
+| ------------------------------ | ---------------------------------- |
+| OpenClaw, global               | `~/.openclaw/skills/`            |
+| Claude Code, global            | `~/.claude/skills/`              |
 | Claude Code, this project only | `<project root>/.claude/skills/` |
 
 ```bash
@@ -73,10 +73,10 @@ Request an API key at [http://ai.szfiu.com](http://ai.szfiu.com), then:
 export FIU_MCP_GATEWAY_AUTHORIZATION="Bearer YOUR_API_KEY"
 ```
 
-| Variable | Required | Default |
-|----------|----------|---------|
-| `FIU_MCP_GATEWAY_AUTHORIZATION` | yes | — (`Bearer <API_KEY>`) |
-| `FIU_MCP_URL` | no | `http://ai.szfiu.com/api/mcp/v2` |
+| Variable                          | Required | Default                            |
+| --------------------------------- | -------- | ---------------------------------- |
+| `FIU_MCP_GATEWAY_AUTHORIZATION` | yes      | — (`Bearer <API_KEY>`)          |
+| `FIU_MCP_URL`                   | no       | `http://ai.szfiu.com/api/mcp/v2` |
 
 Requires `node` and `bash`. `scripts/call.py` is a Python twin of `scripts/call.js` and takes
 the same arguments, except that it prints usage via `-h` / `--help` rather than a `help`
@@ -94,46 +94,46 @@ Five checks — tool catalog, catalog lookup, and HK / US / CN / IPO / JP quotes
 
 ## Capability
 
-| Capability | What you get | Markets |
-|------------|--------------|---------|
-| Snapshot quotes | Last price, change, turnover, market cap, valuation | HK US CN JP |
-| Security search | Look up stocks, ETFs, indices, funds, warrants, bonds by keyword | HK US CN JP |
-| Candlesticks | Minute to monthly K-line, forward / backward adjusted, latest bar | HK US CN JP |
-| Order book | Real-time bid / ask depth | HK US CN JP |
-| Tick trades | Tick-by-tick detail, trade history, trade statistics | HK US CN JP |
-| Intraday trend | Today's trend line and mini trend chart | HK US CN JP |
-| Capital flow | Inflow / outflow, order-size distribution, trailing N-day flow | HK US CN JP |
-| Market overview | Advance / decline distribution and market statistics | HK US CN JP |
-| Rankings | Stock, industry, ETF, IPO, broker and option rankings | HK US CN JP |
-| Industries & indices | Industry and index lists, constituents, sector membership | HK US CN JP |
-| Position cost | Cost range and chip movement distribution | HK US |
-| Company profile | Basic profile, management, extended profile | HK US CN |
-| Financial statements | Income, balance sheet, cash flow, key indicators | HK US CN |
-| Business & governance | Revenue breakdown, dividends, splits, buybacks, halts, AGMs | HK US CN |
-| Shareholding | Major and top-ten shareholders, holding changes | HK US CN |
-| Institutional holdings | Institutional holding detail and statistics | US |
-| Fund / broker holdings | Fund holdings, broker holdings, daily short selling | HK US |
-| Funds & ETFs | NAV, asset and sector allocation, ETF lists and constituents | HK US JP |
-| Stock Connect | Quota, net turnover, rankings, holding ratio | HK CN |
-| IPO | Calendar, offerings, underwriters, cornerstone investors, margin, rankings | HK US |
-| Options | OPRA chains, quotes, Greeks, overview, rankings | US |
-| Bonds | Bond search, profile, quotes, depth, rankings, yield curves | `GLOBAL` |
-| News | Search, semantic search, per-symbol, latest, detail, digest | HK US CN JP |
-| Reference data | ISIN / SEDOL / CIK / ADR, currency, symbol mapping, trading status, market hours | HK US CN JP |
+| Capability             | What you get                                                                     | Markets     |
+| ---------------------- | -------------------------------------------------------------------------------- | ----------- |
+| Snapshot quotes        | Last price, change, turnover, market cap, valuation                              | HK US CN JP |
+| Security search        | Look up stocks, ETFs, indices, funds, warrants, bonds by keyword                 | HK US CN JP |
+| Candlesticks           | Minute to monthly K-line, forward / backward adjusted, latest bar                | HK US CN JP |
+| Order book             | Real-time bid / ask depth                                                        | HK US CN JP |
+| Tick trades            | Tick-by-tick detail, trade history, trade statistics                             | HK US CN JP |
+| Intraday trend         | Today's trend line and mini trend chart                                          | HK US CN JP |
+| Capital flow           | Inflow / outflow, order-size distribution, trailing N-day flow                   | HK US CN JP |
+| Market overview        | Advance / decline distribution and market statistics                             | HK US CN JP |
+| Rankings               | Stock, industry, ETF, IPO, broker and option rankings                            | HK US CN JP |
+| Industries & indices   | Industry and index lists, constituents, sector membership                        | HK US CN JP |
+| Position cost          | Cost range and chip movement distribution                                        | HK US       |
+| Company profile        | Basic profile, management, extended profile                                      | HK US CN    |
+| Financial statements   | Income, balance sheet, cash flow, key indicators                                 | HK US CN    |
+| Business & governance  | Revenue breakdown, dividends, splits, buybacks, halts, AGMs                      | HK US CN    |
+| Shareholding           | Major and top-ten shareholders, holding changes                                  | HK US CN    |
+| Institutional holdings | Institutional holding detail and statistics                                      | US          |
+| Fund / broker holdings | Fund holdings, broker holdings, daily short selling                              | HK US       |
+| Funds & ETFs           | NAV, asset and sector allocation, ETF lists and constituents                     | HK US JP    |
+| Stock Connect          | Quota, net turnover, rankings, holding ratio                                     | HK CN       |
+| IPO                    | Calendar, offerings, underwriters, cornerstone investors, margin, rankings       | HK US       |
+| Options                | OPRA chains, quotes, Greeks, overview, rankings                                  | US          |
+| Bonds                  | Bond search, profile, quotes, depth, rankings, yield curves                      | `GLOBAL`  |
+| News                   | Search, semantic search, per-symbol, latest, detail, digest                      | HK US CN JP |
+| Reference data         | ISIN / SEDOL / CIK / ADR, currency, symbol mapping, trading status, market hours | HK US CN JP |
 
 ---
 
 ## Markets
 
-| Code | Market | Symbols |
-|------|--------|---------|
-| `HK` | Hong Kong | `00700.hk`; also warrants / CBBCs |
-| `US` | United States | `AAPL.us`; also OPRA options |
-| `CN` | A-share (Shanghai / Shenzhen) | `600519.sh`, `000001.sz`, `300750.sz` |
-| `JP` | Japan | `6758.jp` |
-| `IPO` | New listings | `00668.hk` |
+| Code    | Market           | Symbols                                     |
+| ------- | ---------------- | ------------------------------------------- |
+| `HK`  | Hong Kong        | `00700.hk`; also warrants / CBBCs         |
+| `US`  | United States    | `AAPL.us`; also OPRA options              |
+| `CN`  | A-share (Zhcall) | `600519.sh`, `000001.sz`, `300750.sz` |
+| `JP`  | Japan            | `6758.jp`                                 |
+| `IPO` | New listings     | `00668.hk`                                |
 
-`CN` is a gateway routing label, not a downstream `market` field — A-share downstreams take
+`CN` is a gateway routing label, not a downstream `market` field — A-share(Zhcall) downstreams take
 the board (`SH` / `SZ` / `ALL`) in `marketBoard`. Bond endpoints route through `market=GLOBAL`.
 
 ---
