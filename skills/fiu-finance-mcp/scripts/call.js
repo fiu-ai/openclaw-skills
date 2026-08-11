@@ -369,7 +369,11 @@ function parseParamValue(key, value) {
   if (value === "true") return true;
   if (value === "false") return false;
   if (value === "null") return null;
-  if (/^-?\d+(\.\d+)?$/.test(value)) return Number(value);
+  // 数字自动转换，但保留前导零（如港股代码 00700）
+  if (/^-?\d+(\.\d+)?$/.test(value)) {
+    if (/^-?0\d/.test(value)) return value;
+    return Number(value);
+  }
   if (value.startsWith("[") || value.startsWith("{")) {
     return parseJsonArg(value, `${key} param`);
   }

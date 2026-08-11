@@ -232,9 +232,13 @@ def parse_param_value(key, value):
         return False
     if value == "null":
         return None
+    # 数字自动转换，但保留前导零（如港股代码 00700）
     try:
         if "." in value:
             return float(value)
+        # 前导零检测：以 0 开头且后面紧跟数字（如 00700、-00700），保持字符串
+        if re.match(r'^-?0\d', value):
+            return value
         return int(value)
     except ValueError:
         pass

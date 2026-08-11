@@ -53,7 +53,7 @@
 | `fund_etf`                 | `dataType`                                    | `list`、`issuer`（仅 HK）、`area`、`direction`、`type`、`constituent`；基金用 `value`、`asset`、`sector` |
 | `stock_connect`            | `connectType`                                 | `balance`、`net_turnover`、`shareholding_ratio`、`rank_change_rate` 等                                             |
 | `ipo`                      | `ipoType` / `rankType` / `contentType` 等 | 每个 endpoint 一套，务必先`describe_tool`                                                                                |
-| `fiu_news`                 | `market`                                      | 必填；`news_get`/`news_related` 另需 `id`，`news_semantic_search` 另需 `query`                                   |
+| `fiu_news`                 | `market`                                      | 必填；`news_by_symbol` 另需 `symbol`（必填，不带后缀），`news_get`/`news_related` 另需 `id`，`news_semantic_search` 另需 `query`                                   |
 | `reference`                | `referenceType`、`statusType`               | `isin`、`sedol`、`cik`、`currency`；`trade_date`、`session`、`exright`                                       |
 
 ## 财务报告期筛选
