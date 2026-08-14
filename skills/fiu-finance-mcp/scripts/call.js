@@ -4,12 +4,25 @@ const DEFAULT_URL = process.env.FIU_MCP_URL || "http://ai.szfiu.com/api/mcp/v2";
 const PORTAL_FALLBACK = "http://ai.szfiu.com";
 const PROTOCOL_VERSION = "2025-06-18";
 const AUTH_ENV = "FIU_MCP_GATEWAY_AUTHORIZATION";
+const IDENTIFIER_PARAM_KEYS = new Set([
+  "id",
+  "symbol",
+  "code",
+  "root",
+  "ticker",
+  "securityCode",
+  "stockCode",
+  "warrantCode",
+  "isin",
+  "sedol",
+  "cik"
+]);
 
 // 出错时用来判断哪个 host 是"对外的"，其余 host:port 一律脱敏。
 let activeUrl = DEFAULT_URL;
 
 async function main() {
-  const { command, args, url, raw, endpoint, paramPairs } = parseCli(process.argv.slice(2));
+  const { command, args, url, raw, endpoint, paramPairs, detail } = parseCli(process.argv.slice(2));
   activeUrl = url;
 
   if (command === "help" || !command) {
@@ -29,7 +42,7 @@ async function main() {
       method: "tools/call",
       params: {
         name: "describe_tool",
-        arguments: { toolNames }
+        arguments: { toolNames, detail }
       }
     };
   } else if (command === "call") {
@@ -288,6 +301,8 @@ function parseCli(argv) {
   let url = DEFAULT_URL;
   let raw = false;
   let endpoint;
+  let detail = "summary";
+  let detailSpecified = false;
   const paramPairs = [];
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -298,11 +313,22 @@ function parseCli(argv) {
       raw = true;
     } else if (value === "--endpoint" || value === "-e") {
       endpoint = argv[++i];
+    } else if (value === "--detail") {
+      detail = argv[++i];
+      detailSpecified = true;
     } else if (value === "--param" || value === "-p") {
       paramPairs.push(argv[++i]);
     } else {
       args.push(value);
     }
+  }
+
+  if (!["summary", "params", "full"].includes(detail)) {
+    throw new Error(`Invalid --detail value: ${detail}. Expected summary, params, or full.`);
+  }
+
+  if (detailSpecified && args[0] !== "describe") {
+    throw new Error("--detail is only supported by the describe command.");
   }
 
   return {
@@ -311,7 +337,8 @@ function parseCli(argv) {
     url,
     raw,
     endpoint,
-    paramPairs
+    paramPairs,
+    detail
   };
 }
 
@@ -369,11 +396,8 @@ function parseParamValue(key, value) {
   if (value === "true") return true;
   if (value === "false") return false;
   if (value === "null") return null;
-  // 数字自动转换，但保留前导零（如港股代码 00700）
-  if (/^-?\d+(\.\d+)?$/.test(value)) {
-    if (/^-?0\d/.test(value)) return value;
-    return Number(value);
-  }
+  if (IDENTIFIER_PARAM_KEYS.has(key)) return value;
+  if (/^-?\d+(\.\d+)?$/.test(value)) return Number(value);
   if (value.startsWith("[") || value.startsWith("{")) {
     return parseJsonArg(value, `${key} param`);
   }
@@ -457,7 +481,7 @@ function unwrapToolResult(result) {
 function printHelp() {
   console.log(`Usage:
   node scripts/call.js list [--url http://ai.szfiu.com/api/mcp/v2]
-  node scripts/call.js describe quote_kline,get_kline [--url http://ai.szfiu.com/api/mcp/v2]
+  node scripts/call.js describe quote_kline,get_kline [--detail summary|params|full] [--url http://ai.szfiu.com/api/mcp/v2]
   node scripts/call.js call <tool_name> '<arguments_json>' [--url http://ai.szfiu.com/api/mcp/v2]
   node scripts/call.js call <tool_name> --endpoint <endpoint> --param key=value
 
@@ -466,6 +490,7 @@ Examples:
   node scripts/call.js call quote_spot --endpoint get_quote --param market=HK --param assetType=stock --param symbols=00700.hk
   node scripts/call.js call quote_kline '{"endpoint":"get_kline","params":{"market":"US","assetType":"stock","symbol":"AAPL.us","period":"1d","limit":30}}'
   node scripts/call.js describe '["fiu_news","news_digest"]'
+  node scripts/call.js describe quote_spot --detail params
 
 Environment:
   FIU_MCP_URL=http://ai.szfiu.com/api/mcp/v2

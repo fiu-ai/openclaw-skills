@@ -19,6 +19,11 @@ DEFAULT_URL = os.environ.get("FIU_MCP_URL", "http://ai.szfiu.com/api/mcp/v2")
 PORTAL_FALLBACK = "http://ai.szfiu.com"
 PROTOCOL_VERSION = "2025-06-18"
 AUTH_ENV = "FIU_MCP_GATEWAY_AUTHORIZATION"
+IDENTIFIER_PARAM_KEYS = {
+    "id", "symbol", "code", "root", "ticker",
+    "securityCode", "stockCode", "warrantCode",
+    "isin", "sedol", "cik",
+}
 
 # 出错时用来判断哪个 host 是"对外的"，其余 host:port 一律脱敏。
 ACTIVE_URL = DEFAULT_URL
@@ -146,6 +151,7 @@ def main():
     parser.add_argument("items", nargs="*")
     parser.add_argument("--url", default=DEFAULT_URL)
     parser.add_argument("--raw", action="store_true")
+    parser.add_argument("--detail", choices=["summary", "params", "full"], default="summary")
     parser.add_argument("--endpoint", "-e")
     parser.add_argument("--param", "-p", action="append", default=[])
     args = parser.parse_args()
@@ -162,7 +168,8 @@ def main():
         result = client.request("tools/call", {
             "name": "describe_tool",
             "arguments": {
-                "toolNames": parse_tool_names(args.items[0])
+                "toolNames": parse_tool_names(args.items[0]),
+                "detail": args.detail,
             },
         })
     elif args.command == "call":
@@ -232,13 +239,11 @@ def parse_param_value(key, value):
         return False
     if value == "null":
         return None
-    # 数字自动转换，但保留前导零（如港股代码 00700）
+    if key in IDENTIFIER_PARAM_KEYS:
+        return value
     try:
         if "." in value:
             return float(value)
-        # 前导零检测：以 0 开头且后面紧跟数字（如 00700、-00700），保持字符串
-        if re.match(r'^-?0\d', value):
-            return value
         return int(value)
     except ValueError:
         pass
