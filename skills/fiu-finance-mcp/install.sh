@@ -16,4 +16,4 @@ echo "==> Done"
 echo
 echo "    export FIU_MCP_GATEWAY_AUTHORIZATION=\"Bearer YOUR_API_KEY\""
 echo
-echo "Get a key at http://ai.szfiu.com"
+echo "Get a key at https://ai.szfiu.com"

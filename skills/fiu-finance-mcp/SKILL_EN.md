@@ -76,7 +76,7 @@ Decide which domain the question belongs to, then load only the matching file. D
 
 ## Working rules
 
-1. **Describe before calling.** When the `endpoint` or its fields are unclear, call `describe_tool` first. `detail=summary` (default) for routing, `detail=params` for fields, `detail=full` for one endpoint when a call keeps failing.
+1. **Describe before calling.** When the `endpoint` or its fields are unclear, call `describe_tool` first. `detail=summary` (default) for routing, `detail=params` for fields.
 2. **Most endpoints need a discriminator.** `ipoType`, `connectType`, `dataType`, `holdingType`, `actionType`, `referenceType`, `optionType` and similar fields are required — `describe_tool` lists the legal values.
 3. **Batch modestly.** Keep batch quote, financial, holding and news queries to about 5 subjects or 5 metrics per call.
 4. **Markets.** `CN` is the A-share(Zhcall) market. `GLOBAL` is cross-market data, currently fixed income — do not use it for ordinary equities.
@@ -119,3 +119,4 @@ Use it when you are unsure of the CLI syntax. To find out *what to call*, use `d
 - Dates are `YYYY-MM-DD`; minute-level K-line, ticks and intraday use `YYYY-MM-DD HH:mm:ss`.
 - Never put the API key in `params`.
 - Interpret the data objectively; do not give directional buy or sell advice.
+- Successful business responses include `code: 0` and `resultStatus`: `ok` has data; `empty` has no business records and includes `emptyReason`. Treat `isError: true` as a failure, not an empty result.

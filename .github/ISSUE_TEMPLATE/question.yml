@@ -1,33 +1,47 @@
-name: ❓ Question / Help
-description: Ask a question or get help
-title: "[Question]: "
+name: Question / 使用咨询
+description: Ask about installation, configuration or usage / 咨询安装、配置或使用问题
+title: "[Question] "
 labels: ["question"]
 body:
   - type: markdown
     attributes:
       value: |
-        Have a question? Need help? Fill out the form below and we'll get back to you.
+        Before asking, please check [USAGE_EN.md](../../USAGE_EN.md) / [USAGE.md](../../USAGE.md) and the troubleshooting reference.
+        提问前请先看 [USAGE.md](../../USAGE.md) 和排障文档。
+
+        Please do **not** paste your API key. / 请**不要**粘贴 API Key。
+
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic / 主题
+      options:
+        - Installation / 安装
+        - Authentication / 鉴权
+        - Client configuration / 客户端配置
+        - Which toolset to use / 工具集选择
+        - Data coverage / 数据覆盖范围
+        - Other / 其他
+    validations:
+      required: true
+
   - type: textarea
     id: question
     attributes:
-      label: Your Question
-      description: What would you like to know?
-      placeholder: How do I...?
+      label: Question / 问题
     validations:
       required: true
+
   - type: textarea
-    id: context
+    id: tried
     attributes:
-      label: Context
-      description: What have you tried so far? What's your setup?
-  - type: dropdown
-    id: type
+      label: What you have tried / 已尝试的操作
+      placeholder: |
+        ./test.sh result: ...
+        Docs checked: ...
+
+  - type: input
+    id: client
     attributes:
-      label: Type
-      options:
-        - Usage question
-        - Configuration help
-        - Integration question
-        - Other
-    validations:
-      required: true
+      label: Client and version / 客户端与版本
+      placeholder: Claude Code 2.x / Claude Desktop / Cursor / ...

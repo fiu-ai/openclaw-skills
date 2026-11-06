@@ -1,409 +1,368 @@
-# FIU MCP Gateway Interface Documentation
+# Toolset Reference
 
-Complete interface specification for AI tools and integrators. Contents were pulled from a live
-full `describe_tool` sweep of the gateway: **24 tools, 86 endpoints, 5 markets**.
+26 business toolsets, 104 endpoints, plus the `describe_tool` and `search` helper tools (28 MCP tools in total).
 
-## Table of Contents
-
-- [Connection](#connection)
-- [Call model](#call-model)
-- [Markets and symbols](#markets-and-symbols)
-- [describe_tool](#describe_tool)
-- [Endpoint catalog](#endpoint-catalog)
-- [Error codes](#error-codes)
-
----
-
-## Connection
-
-| Item | Value |
-|------|-------|
-| Endpoint | `http://ai.szfiu.com/api/mcp/v2` |
-| Transport | Streamable HTTP (JSON-RPC 2.0, SSE responses) |
-| Protocol version | `2025-06-18` (`Mcp-Protocol-Version` header) |
-| Auth | `Authorization: Bearer <API_KEY>` |
-| Session | `initialize` returns `Mcp-Session-Id`; echo it on every subsequent request |
-
-MCP client configuration:
+Most business toolsets take two arguments:
 
 ```json
 {
-    "mcpServers": {
-        "fiuFinance": {
-            "description": "FIU Finance MCP gateway",
-            "transport": "streamable_http",
-            "url": "http://ai.szfiu.com/api/mcp/v2",
-            "headers": {
-                "Authorization": "Bearer {api_key}"
-            }
-        }
-    }
+  "endpoint": "<endpoint name from the table below>",
+  "params": { "...": "endpoint-specific fields" }
 }
 ```
 
-The handshake is `initialize` → `notifications/initialized` → `tools/call`. SSE responses use
-CRLF line endings — take the last `data:` line and parse it. A command-line implementation
-lives in `skills/fiu-finance-mcp/scripts/call.js` (Node, zero dependencies) and `call.py`
-(Python).
+Common field names such as `market`, `symbol`, `symbols`, `date`, `startDate`, `endDate` and `limit` are endpoint-specific: only send fields declared by that endpoint's `describe_tool` result. Anything else — `ipoType`, `connectType`, `dataType`, `holdingType` and so on — also goes in `params` when declared by the endpoint. The flat toolsets `market_overview`, `market_flow`, `market_position_cost`, `shareholding_institution`, `macro_economics` and `company_announcements` expose business fields directly under `arguments`.
 
----
-
-## Call model
-
-Tools are not one-function-per-endpoint; they are **toolsets**. Every business tool takes
-exactly two arguments:
-
-```json
-{
-    "name": "quote_spot",
-    "arguments": {
-        "endpoint": "get_quote",
-        "params": { "market": "HK", "assetType": "stock", "symbols": ["00700.hk"] }
-    }
-}
-```
-
-- `endpoint` — the capability inside the toolset; see the [catalog](#endpoint-catalog).
-- `params` — business fields; `market` and friends go at this level.
-- `params.params` — pass-through for downstream fields the gateway does not surface as named
-  params, e.g. `{"sortField":"changeRate","sortType":1}`.
-
-**Most endpoints require a discriminator field** that selects among several downstream APIs:
-`statementType`, `dataType`, `holdingType`, `actionType`, `referenceType`, `optionType`,
-`connectType`, `ipoType`, `costType`, `warrantType`, `bondType`, `statusType`, `industryType`,
-`indexType`, `rankType`, `flowType`, `historyType`, `statisticsType`. Look up the accepted
-values with `describe_tool` at `detail=params`.
-
----
-
-## Markets and symbols
-
-| Market code | Market | Symbol examples |
-|-------------|--------|-----------------|
-| `HK` | Hong Kong | `00700.hk` |
-| `US` | United States | `AAPL.us` |
-| `CN` | A-share (Shanghai / Shenzhen) | `600519.sh`, `000001.sz`, `300750.sz` |
-| `JP` | Japan | `6758.jp` |
-| `GLOBAL` | Bond routing label | ISIN, e.g. `US91282CHZ77` |
-
-- `CN` and `GLOBAL` are **gateway routing labels**, not the downstream `market` field.
-  A-share downstreams take the board in `marketBoard` (`ALL` / `SH` / `SZ`).
-- `GLOBAL` routes to the `bond_basic` and `bond_analytics` toolsets.
-- Dates are `YYYY-MM-DD`; minute K-line, ticks and intraday take `YYYY-MM-DD HH:mm:ss`.
-- The market list on a tool is a **union** — an individual endpoint can be narrower. For
-  example `fund_etf` is tagged `HK/JP/US`, but `get_fund_performance` is US-only.
-- Keep batch quote, financial, holding and news queries to about 5 subjects per call;
-  `get_security_profile` caps `symbols` at 50.
+Required fields are listed below. For full parameter descriptions, types, defaults and enum semantics, call `describe_tool` with `detail: "params"`.
 
 ---
 
 ## describe_tool
 
-The catalog tool, and the entry point for every call.
-
-| detail | Use for | Limit |
-|--------|---------|-------|
-| `summary` (default) | Picking a toolset, checking market and asset coverage | up to 5 names |
-| `params` | Field names, required flags, enum values | up to 5 names |
-| `full` | Debugging one endpoint that keeps failing | 1 endpoint |
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `toolNames` | `string[]` | yes | Up to 5 toolset names, endpoint names or toolset keys |
+| `detail` | `summary` \| `params` | no | Default `summary` returns a compact call contract; `params` adds detailed parameter descriptions and routing requirements |
 
 ```json
-{ "name": "describe_tool", "arguments": { "toolNames": ["quote_spot"], "detail": "params" } }
-```
-
-```bash
-node scripts/call.js describe quote_spot,quote_kline,quote_intraday,market_flow,reference
-node scripts/call.js call describe_tool '{"toolNames":["quote_spot"],"detail":"params"}'
+{ "toolNames": ["f10_financials", "get_financial_statement"], "detail": "params" }
 ```
 
 ---
 
-## Endpoint catalog
+## Quotes
 
-### quote_spot — spot quotes
+### `quote_spot` — HK, US, CN, JP, GLOBAL
 
-Markets `CN GLOBAL HK JP US`; assets `bond etf fund index stock warrant`
+Security search, static profile, snapshot and extended quotes.
 
-| endpoint | Description |
-|----------|-------------|
-| `search_security` | Search stocks, ETFs, indices, funds, warrants or bonds |
-| `get_security_profile` | Static reference profile for a security or bond (max 50 `symbols`) |
-| `get_quote` | Real-time / snapshot quotes for stocks, ETFs, indices, warrants, bonds |
-| `get_security_definition` | Security master detail, new-listing reference lists |
+| Endpoint | Required |
+| --- | --- |
+| `get_quote` | `assetType` = `stock` \| `etf` \| `index` \| `warrant` \| `bond`, `symbols` |
+| `get_security_definition` | `market` = `HK` \| `US` \| `CN`, `definitionType` = `stock_define` \| `double_counter` \| `new_stocks` |
+| `get_security_profile` | `symbols` |
+| `search_security` | — |
 
-### quote_intraday — intraday data
+### `quote_intraday` — HK, US, CN, JP, GLOBAL
 
-Markets `CN GLOBAL HK JP US`; assets `bond etf index stock`
+Order book, tick-by-tick trades, intraday trend.
 
-| endpoint | Description |
-|----------|-------------|
-| `get_orderbook` | Order book / depth |
-| `get_trades` | Tick-by-tick trades |
-| `get_intraday_trend` | Intraday trend line |
-| `get_trade_history` | Historical tick data |
-| `get_trade_statistics` | Trade statistics overview and detail |
-| `get_mini_trend` | Mini trend chart |
+| Endpoint | Required |
+| --- | --- |
+| `get_intraday_trend` | `symbol` |
+| `get_mini_trend` | `symbol` |
+| `get_orderbook` | `symbol` |
+| `get_trade_history` | `market` = `HK` \| `US`, `historyType` = `trade`, `symbol` |
+| `get_trade_statistics` | `market` = `HK` \| `US` \| `CN` \| `JP`, `statisticsType` = `overview` \| `detail` |
+| `get_trades` | `symbol` |
 
-### quote_kline — candlesticks
+### `quote_kline` — HK, US, CN, JP, GLOBAL
 
-Markets `CN GLOBAL HK JP US`; assets `bond etf index stock`
+K-line, historical snapshots, return series.
 
-| endpoint | Description |
-|----------|-------------|
-| `get_kline` | Historical K-line (`period` `1m`–`240m` plus daily/weekly/monthly, `adjust` for forward/backward adjustment) |
-| `get_latest_kline` | Latest candle |
-| `get_snapshot_history` | Historical security snapshots |
+| Endpoint | Required |
+| --- | --- |
+| `get_kline` | `assetType` = `stock` \| `index` \| `bond`, `symbol` |
+| `get_jp_kline` | `symbol` or `symbols` (JP only) |
+| `get_snapshot_history` | `market` = `HK` \| `US`, `historyType` = `snapshot`, `symbol` |
 
-### quote_derivatives_hk — HK derivatives and extended quotes
+`period` for `get_kline`: `1m`, `3m`, `5m`, `15m`, `30m`, `60m`, `120m`, `240m`, `1d`, `1w`, `1mo`, `1q`, `1y`.
+`adjust`: `none` (default), `forward`, `backward`. `limit` defaults to 100, max 500.
+`get_kline` uses `date` as its single cutoff field and `limit` as the number of bars returned before that cutoff. It does not accept `startDate` or `endDate`. Use `YYYY-MM-DD` for daily or longer periods and `YYYY-MM-DD HH:mm:ss` for minute periods.
 
-Markets `CN GLOBAL HK JP US`; assets `bond etf index stock warrant`
+### `quote_derivatives_hk` — HK
 
-| endpoint | Description |
-|----------|-------------|
-| `get_quote_extend` | Extended quote with fuller price, turnover, market-cap and valuation fields |
-| `get_hk_warrant_catalog` | HK warrant / CBBC catalog, issuers and descriptions |
-| `get_hk_warrant_trading_data` | HK warrant trade statistics, active lists, historical trend |
+Warrants and CBBC.
 
-### quote_us_options — US options
+| Endpoint | Required |
+| --- | --- |
+| `get_hk_warrant_catalog` | `warrantType` = `issuer` \| `list` \| `list_en` \| `profile` |
+| `get_hk_warrant_trading_data` | `warrantTradeType` = `history` \| `rank` \| `statistics` |
+| `get_quote_extend` | `symbols` |
 
-Markets `US`
+### `quote_us_options` — US
 
-| endpoint | Description |
-|----------|-------------|
-| `get_us_option_chain` | Expirations, chains, contract lists, snapshots and Greeks |
-| `get_us_option_quote` | Contract snapshot, depth, ticks, K-line, intraday, trade statistics |
-| `get_us_option_overview` | Options market overview and ETF options overview |
-| `get_us_option_rankings` | Options rankings |
+OPRA option chain, quotes, Greeks, rankings.
 
-### market_overview — market overview
-
-Markets `CN HK JP US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_market_statistics` | Advance/decline distribution and other market statistics |
-
-### market_ranking — rankings
-
-Markets `CN HK JP US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_rankings` | Stock, industry, ETF, IPO, options and broker rankings |
-
-### market_flow — capital flow
-
-Markets `CN HK JP US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_capital_flow` | Capital flow, turnover distribution, N-day flow |
-
-### market_structure — industries and indices
-
-Markets `CN HK JP US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_industry_data` | Industry list, rankings, constituents, sector membership |
-| `get_index_data` | Index list, quotes, constituents, mappings, capital distribution |
-| `get_market_microstructure` | Spread, cross-market premium, dual counter, broker seats (HK) |
-
-### market_position_cost — position cost
-
-Markets `HK US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_position_cost` | Cost range (`costType=range` + `price`) and cost distribution (`costType=distribution` + `high` / `low`) |
-
-### f10_profile — company profile
-
-Markets `CN HK US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_company_profile` | Basic company profile, company data, related information |
-| `get_company_management` | Executives and management |
-| `get_company_extra_profile` | Extended / special-security profile |
-
-### f10_financials — financial statements
-
-Markets `CN HK US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_financial_statement` | Income statement, balance sheet, cash flow (`statementType`) |
-| `get_financial_indicator` | Key financial indicators |
-
-### f10_business_governance — business and governance
-
-Markets `CN HK US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_business_segment` | Revenue breakdown / business segments |
-| `get_company_action` | Dividends, splits, AGMs, symbol changes, transfers, buybacks, halts, share-capital changes |
-
-### shareholding_structure — shareholding structure
-
-Markets `CN HK US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_shareholders` | Major shareholders, top ten, current holdings, equity detail |
-| `get_shareholding_change` | Share-capital changes, insider holding changes |
-
-### shareholding_institution — institutional holdings
-
-Markets `US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_institution_holding` | Institutional holding detail or statistics |
-
-### shareholding_fund_broker — fund / broker holdings and short selling
-
-Markets `HK US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_fund_holding` | Fund holdings or fund constituents (US) |
-| `get_broker_holding` | HK broker holding ratio, detail, rankings |
-| `get_short_sell` | Daily short selling |
-
-### fund_etf — funds and ETFs
-
-Markets `HK JP US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_fund_data` | Fund NAV, asset allocation, sector allocation |
-| `get_etf_data` | ETF list, types, constituents, issuers, investment region and direction |
-| `get_fund_performance` | Historical fund performance (US only) |
-
-### stock_connect — Stock Connect
-
-Markets `CN HK`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_stock_connect_data` | Combined Shanghai/Shenzhen–Hong Kong Connect data |
-| `get_hk_stock_connect_data` | Hong Kong Connect / northbound data |
-| `get_cn_stock_connect_data` | Mainland Connect / southbound data |
-
-### ipo — new listings
-
-Markets `HK US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_hk_ipo_calendar` | HK IPO calendar |
-| `get_hk_ipo_list` | HK new-listing lists: subscribing today, pending, listed, filed (`ipoType`) |
-| `get_hk_ipo_detail` | Offering detail and allotment results |
-| `get_hk_ipo_company_profile` | IPO company profile |
-| `get_hk_ipo_underwriter` | Underwriters and sponsors |
-| `get_hk_ipo_cornerstone_investor` | Cornerstone investors |
-| `get_hk_ipo_margin_info` | Subscription multiple, subscription amount, margin |
-| `get_hk_ipo_rankings` | Hot subscriptions, first-day return, sponsor, underwriter, cornerstone rankings |
-| `get_hk_ipo_notice` | Prospectus and filing announcements (IPO scope only) |
-| `get_hk_ipo_subscription_tools` | Subscription calculator, lot counts, brokers, methods, allotment lots |
-| `get_hk_ipo_market_data` | HK IPO market overview, industry statistics and performance |
-| `get_us_ipo_list` | US pending / listed new issues, trend, PE TTM |
-| `get_us_ipo_detail` | US IPO detail |
-| `get_us_ipo_underwriter` | US underwriter performance and detail |
-| `get_us_ipo_market_data` | US IPO market overview and industry performance |
-| `search_ipo_content` | Search IPO news or content |
-| `get_ipo_news` | IPO news list, detail, hot, rankings, recommended, related |
-| `get_ipo_topic` | IPO topic list, pinned, detail, related news |
-| `get_ipo_course` | IPO course list, hot, rankings, recommended, detail |
-| `get_ipo_tags` | IPO content tags |
-
-### bond_basic — bond basics
-
-Markets `GLOBAL`
-
-| endpoint | Description |
-|----------|-------------|
-| `search_bond` | Search bonds |
-| `get_bond_profile` | Bond profile, bond master, institutional bond pools |
-| `get_bond_quote` | Bond snapshot, extended quote, yield snapshot |
-| `get_bond_orderbook` | Bond order book |
-
-### bond_analytics — bond analytics
-
-Markets `GLOBAL`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_bond_rankings` | Bond rankings, simple rankings, bond ETF rankings |
-| `get_bond_chart` | Historical trend, intraday, yield K-line / intraday, treasury yield list |
-| `get_bond_yield` | Yield master, snapshot, K-line, intraday |
-| `get_bond_trading_status` | Bond and bond-yield market trading status |
-
-### fiu_news — news
-
-Markets `CN GLOBAL HK JP US`
-
-| endpoint | Description |
-|----------|-------------|
-| `news_search` | Search news |
-| `news_semantic_search` | Search news by semantic similarity |
-| `news_by_symbol` | News for a given symbol |
-| `news_latest` | Latest news over a recent window |
-| `news_get` | Fetch one article by ID |
-| `news_related` | Related articles by ID |
-| `news_count` | Count articles matching a filter |
-| `news_digest` | AI-summary-ready material, returns `content_preview` |
-
-### reference — reference data
-
-Markets `CN GLOBAL HK JP US`
-
-| endpoint | Description |
-|----------|-------------|
-| `get_reference_data` | ISIN, SEDOL, CIK, ADR, currency, trading master, base master, warrant linkage, bond master |
-| `get_trading_status` | Trading dates, sessions, ex-rights events, security status, delisting list |
-| `get_symbol_mapping` | Symbol/name mapping, index mapping |
-| `get_market_hours` | Market session status |
+| Endpoint | Required |
+| --- | --- |
+| `get_us_option_chain` | `optionType` = `expiration` \| `chain` \| `symbols` \| `snapshot` \| `greeks` \| `callput_volume` |
+| `get_us_option_overview` | `optionType` = `latest` \| `line` \| `etf_latest` \| `etf_line` |
+| `get_us_option_quote` | `optionType` = `snapshot` \| `order` \| `batch_order` \| `trade` \| `kline` \| `trend` \| `statistics_overview` \| `statistics_detail` \| `base_info` \| `status` \| `batch_status` \| `transaction_extended` |
+| `get_us_option_rankings` | `rankType` = `list` \| `statistics` \| `top10` |
 
 ---
+
+## Market
+
+### `market_overview` — HK, US, CN, JP
+
+| Endpoint | Required |
+| --- | --- |
+| `get_market_statistics` | `market` = `HK` \| `US` \| `CN` \| `JP` |
+
+### `market_ranking` — HK, US, CN, JP
+
+Stock, industry, ETF, IPO, bond, broker and warrant rankings.
+
+| Endpoint | Required |
+| --- | --- |
+| `get_hk_ranking` | `rankType` = `stock` \| `industry` \| `ipo` \| `broker` \| `market_premium` |
+| `get_us_ranking` | `rankType` = `stock` \| `industry` \| `ipo` \| `etf` |
+| `get_cn_ranking` | `rankType` = `stock` \| `industry` \| `ipo` |
+| `get_jp_ranking` | `rankType` = `stock` \| `hot_stock` \| `industry` |
+
+### `market_flow` — HK, US, CN, JP
+
+| Endpoint | Required |
+| --- | --- |
+| `get_capital_flow` | `market` = `HK` \| `US` \| `CN` \| `JP`, `symbol` |
+
+### `market_structure` — HK, US, CN, JP
+
+| Endpoint | Required |
+| --- | --- |
+| `get_index_data` | `market` = `HK` \| `US` \| `CN`, `indexType` = `list` \| `quote` \| `constituent` \| `mapping` \| `capital_distribution` |
+| `get_industry_data` | `market` = `HK` \| `US` \| `CN` \| `JP`, `industryType` = `list` \| `rank` \| `constituent` \| `belong_quote` |
+| `get_market_microstructure` | `dataType` = `spread` \| `market_premium` \| `double_counter` \| `broker_list` |
+
+### `market_position_cost` — HK, US
+
+| Endpoint | Required |
+| --- | --- |
+| `get_position_cost` | `market` = `HK` \| `US`, `costType` = `range` \| `distribution`, `symbol` |
+
+---
+
+## Fundamentals (F10)
+
+Returns structured statements, indicators and corporate events. It does not return annual-report PDFs, disclosure full text or analyst research.
+
+### `f10_profile` — HK, US, CN
+
+| Endpoint | Required |
+| --- | --- |
+| `get_company_profile` | — |
+| `get_company_management` | — |
+| `get_company_extra_profile` | `dataType` = `parallel` \| `extend_all` |
+
+### `f10_financials` — HK, US, CN
+
+| Endpoint | Required |
+| --- | --- |
+| `get_financial_statement` | — (`statementType` = `income` \| `balance` \| `cash`, default `income`) |
+| `get_financial_indicator` | — |
+
+**Filtering by reporting period.** Put `reportType` in `params`. Values differ by market:
+
+- **HK** — `F` annual, `I` half-year, `P` pre-listing, `Q1` / `Q2` / `Q3` / `Q4` quarterly.
+- **CN** — integers: `1` Q1, `6` interim, `9` first three quarters, `12` annual, `99` non-standard.
+- **US** — `FY` annual, `I1` / `I2` half-year periods, `Q1` / `Q2` / `Q3` / `Q4` quarterly.
+
+### `f10_business_governance` — HK, US, CN
+
+| Endpoint | Required |
+| --- | --- |
+| `get_business_segment` | — |
+| `get_company_action` | `actionType` = `dividends` \| `splits` \| `meeting` \| `codechange` \| `exchange_change` \| `suspension` \| `hold_change` \| `repurchase` \| `share_structure` |
+
+---
+
+## Shareholding
+
+### `shareholding_structure` — HK, US, CN
+
+| Endpoint | Required |
+| --- | --- |
+| `get_shareholders` | `holdingType` = `major` \| `current` \| `detail` \| `topten` |
+| `get_shareholding_change` | — |
+
+### `shareholding_institution` — US
+
+| Endpoint | Required |
+| --- | --- |
+| `get_institution_holding` | `holdingType` = `detail` \| `statistics` |
+
+### `shareholding_fund_broker` — HK, US
+
+| Endpoint | Required |
+| --- | --- |
+| `get_broker_holding` | `holdingType` = `ratio` \| `detail` \| `statistics` \| `rank` \| `f10_ratio` |
+| `get_short_sell` | — |
+
+---
+
+## Funds and Connect
+
+### `fund_data` — Global funds
+
+Fund endpoints do not use `market`, `symbol`, or `dataType`. Use `fund_id` or `fund_class_id`; pagination is `page` (from 0) and `page_size` (maximum 200). Call `search_funds` only when no stable fund identifier is available; once an ID is known, call the target endpoint directly.
+
+| Endpoint | Contract |
+| --- | --- |
+| `search_funds` | `mode` = `search` \| `categories` \| `providers` \| `share_classes`; `share_classes` requires `fund_id` |
+| `get_fund_profile` | one fund reference; `operation` = `default` \| `size` |
+| `get_fund_managers` | one fund reference; `operation` = `current` \| `history` \| `bio` \| `education`; history requires both dates |
+| `get_fund_distributions` | one fund reference plus `start_date` and `end_date` |
+| `get_fund_terms` | one fund reference; `kind` = `fees` \| `constraints` \| `purchase` |
+| `get_fund_nav` | one fund reference; `operation` = `latest` \| `history`; history requires both dates |
+| `get_fund_performance` | one fund reference; `operation` = `latest` \| `custom`; custom requires both dates |
+| `compare_funds` | 2-10 combined `fund_ids` / `fund_class_ids` |
+| `get_fund_risk` | one fund reference; `operation` = `default` \| `rating` \| `debt` |
+| `rank_funds` / `screen_funds` | optional `rank_field` and filters |
+| `get_fund_holdings` | one fund reference; `operation` = `default` \| `top` \| `history`; history requires both dates |
+| `get_fund_exposure` | one fund reference; `operation` = `asset` \| `sector` \| `country` |
+| `get_fund_benchmark` / `get_fund_sales_markets` | one fund reference |
+| `get_country_code` | required `countryName`; accepts Chinese/English names, ISO2, ISO3 and supported aliases |
+
+### `stock_connect` — HK, CN
+
+| Endpoint | Required |
+| --- | --- |
+| `get_stock_connect_data` | `connectType` (12 values, see below) |
+| `get_hk_stock_connect_data` | `connectType` = `minute_flow` \| `balance` \| `cumulative_net_turnover_in` \| `cumulative_net_flow` \| `index_quote` \| `net_turnover` \| `rank_change_rate` \| `rank_net_turnover_in` \| `rank_shareholdings` \| `rank_traded` \| `shareholding_ratio` \| `turnover_flow` |
+| `get_cn_stock_connect_data` | `connectType` = `balance` \| `cumulative_net_flow` \| `net_turnover` \| `quote_info` \| `rank_change_rate` \| `rank_net_turnover_in` \| `rank_shareholdings` \| `shareholding_ratio` |
+
+`marketBoard` = `ALL` \| `SH` \| `SZ` narrows the A-share board. `cumulative_net_flow` supports `SH` / `SZ` only and requires it explicitly. `marketBoard` is independent of the top-level `market`.
+
+---
+
+## IPO — HK, US
+
+Covers IPO, prospectus and filing scenarios only. It is not an announcement search for already-listed companies.
+
+| Endpoint | Required |
+| --- | --- |
+| `get_hk_ipo_calendar` | `ipoType` = `calendar` \| `calendar_detail` |
+| `get_hk_ipo_list` | `ipoType` = `make_new` \| `today` \| `to_be_listed` \| `listed` \| `table` \| `table_detail` |
+| `get_hk_ipo_detail` | `ipoType` = `offering` \| `public_offering` \| `company_info` \| `allocation_top` \| `allocation_bottom` |
+| `get_ipo_profile` | `ipoType` = `profile`, `code` |
+| `get_hk_ipo_company_profile` | `ipoType` = `company_profile` \| `company_profile_new` |
+| `get_hk_ipo_underwriter` | `ipoType` = `underwriter_list` \| `sponsor_list` |
+| `get_hk_ipo_cornerstone_investor` | `ipoType` = `cornerstone_list` \| `cornerstone_rank` |
+| `get_hk_ipo_margin_info` | `ipoType` = `margin` \| `margin_step` \| `broker_info` \| `multiple` |
+| `get_hk_ipo_notice` | `ipoType` = `prospectus` \| `table_notice` |
+| `get_hk_ipo_rankings` | `rankType` = `popular` \| `first_day_return` \| `sponsor` \| `underwriter` \| `cornerstone` |
+| `get_hk_ipo_market_data` | `ipoMarketType` = `market_info` \| `industry_info` \| `industry_performance` \| `industry_name` |
+| `get_hk_ipo_subscription_tools` | `ipoUtilityType` = `compute` \| `h5_compute` \| `amount_list` \| `broker_list` \| `lot` \| `new_stock_list` \| `subscription_list` \| `subscription_dates` |
+| `get_us_ipo_list` | `ipoType` = `to_be_listed` \| `listed` \| `trend` \| `pe_ttm` |
+| `get_us_ipo_detail` | `ipoType` = `stock_details` |
+| `get_us_ipo_underwriter` | `ipoType` = `underwriter_performance` \| `underwriter_detail` |
+| `get_us_ipo_market_data` | `ipoMarketType` = `us_market_info` \| `us_industry_performance` |
+| `get_ipo_news` | `contentType` = `new_stock_info` \| `list` \| `detail` \| `hot` \| `day_rank` \| `week_rank` \| `refer` \| `relate` \| `h5_relate` |
+| `get_ipo_topic` | `topicType` = `top` \| `list` \| `detail` \| `info` |
+| `get_ipo_course` | `courseType` = `search` \| `hot` \| `month_rank` \| `refer` \| `relate` \| `h5_relate` \| `detail` \| `total_rank` |
+| `get_ipo_tags` | `tagType` = `exist_data` \| `list` |
+| `search_ipo_content` | `contentType` = `async_search` \| `search` |
+
+---
+
+## Bonds — GLOBAL
+
+Bond endpoints use `market: "GLOBAL"`. Symbols may be an ISIN.
+
+### `bond_basic`
+
+| Endpoint | Required |
+| --- | --- |
+| `search_bond` | — |
+| `get_bond_profile` | — |
+| `get_bond_quote` | — |
+| `get_bond_orderbook` | — |
+
+### `bond_analytics`
+
+| Endpoint | Required |
+| --- | --- |
+| `get_bond_rankings` | — |
+| `get_bond_chart` | — |
+| `get_bond_yield` | — |
+| `get_bond_trading_status` | — |
+
+---
+
+## News — `fiu_news`, HK, US, CN, JP, GLOBAL
+
+Covers news for listed companies. It does not cover exchange filings, disclosure full text or analyst reports.
+
+| Endpoint | Required |
+| --- | --- |
+| `news_search` | `query` |
+| `news_by_symbol` | `symbol` |
+| `news_latest` | — |
+| `news_get` | `id` |
+| `news_related` | `id` |
+| `news_digest` | — |
+
+`news_search` is semantic search. `limit` defaults to 10, max 50; `hours` on `news_latest` defaults to 24, max 168. Use the endpoint schema for optional date, sorting and relevance fields.
+
+---
+
+## Calendar, macro data and company announcements
+
+### `financial_calendar` — global events
+
+| Endpoint | Required |
+| --- | --- |
+| `search_financial_calendar` | `keyword`, `date` |
+| `get_financial_event_detail` | `id` |
+
+`search_financial_calendar` uses `endDate` for an explicit range, or `direction` and `limit` for a rolling window. It filters with `countryTypes`, `eventTypes`, `markets` and `importanceLevels`, not the securities `market` field.
+
+### `macro_economics` — curated macro series
+
+| Endpoint | Required |
+| --- | --- |
+| `get_macro_overview` | `titleId` |
+
+`titleId` must be one of the values returned by `describe_tool` (10, 20, 30, 40, 50, 60, 70, 80, 90, 100 or 110).
+
+### `company_announcements` — HK, US, CN
+
+| Endpoint | Required |
+| --- | --- |
+| `get_company_announcements` | `market`, `symbols` |
+
+This flat tool uses top-level `arguments` fields. `startDate` and `endDate` are optional. Each announcement stays in the result when an attachment fails; inspect `attachmentStatus`.
+
+---
+
+## Reference — `reference`, HK, US, CN, JP, GLOBAL
+
+| Endpoint | Required |
+| --- | --- |
+| `get_reference_data` | `referenceType` = `isin` \| `sedol` \| `trade_symbol` \| `warrant_related` \| `currency` \| `basic_symbol` \| `cik` \| `adr` \| `bond_codes` \| `yield_codes` |
+| `get_symbol_mapping` | `referenceType` = `stock` \| `index` |
+| `get_trading_status` | `statusType` = `trade_date` \| `session` \| `exright` \| `security` \| `delisted` \| `current` \| `bond_session` \| `yield_session` |
+| `get_market_hours` | — |
+
+Prefer a business toolset when one exists; `reference` is for code mapping and calendar lookups, not for announcement, news or research search.
+
+---
+
+## Shared conventions
+
+| Field | Format |
+| --- | --- |
+| `market` | `HK`, `US`, `CN` (A-share), `JP`, `GLOBAL` (cross-market, currently fixed income) |
+| `symbol` / `symbols` | Full suffix: `00700.hk`, `AAPL.us`, `600519.sh`, `000001.sz`, `6758.jp`; bonds accept an ISIN |
+| Date/time fields | Field names are endpoint-specific. Use `describe_tool`; `get_kline` accepts only cutoff `date`, not `startDate`/`endDate` |
+| `limit` | Meaning and ceiling vary by endpoint — see `describe_tool` |
+
+Do not put `endpoint`, `token` or `Authorization` inside `params`.
+
+## Connection baseline
+
+- HTTPS endpoint: `https://ai.szfiu.com/api/mcp/v2`
+- HTTP header: `Authorization: Bearer YOUR_API_KEY`
+- npm/npx stdio adapter: `npx -y fiu-finance-mcp` with Node.js 20.18.1 or newer and `FIU_API_KEY`
 
 ## Error codes
 
-| code | Meaning | What to do |
-|------|---------|------------|
-| `INVALID_ARGUMENT` | Tool arguments invalid (missing required, wrong type) | Add the parameter it names |
-| `INVALID_SEMANTIC_INPUT` | Gateway semantic validation failed (market / asset / date / paging) | Fix each entry in `details.issues` |
-| `INVALID_DOWNSTREAM_ARGS` | Semantic layer passed, downstream still wants fields | `details.issues` names each one; add them under `params.params` |
-| `UNSUPPORTED_ROUTE` | No downstream route for that endpoint in that market | Switch markets, or check coverage with `describe_tool` |
-| `-32602` | JSON-RPC validation failed (e.g. more than 5 `toolNames`) | Shrink the request |
-
-`INVALID_DOWNSTREAM_ARGS` `details` shape:
-
-```json
-{
-    "semanticToolName": "get_etf_data",
-    "downstreamPath": "/v3/etf/list",
-    "issues": [
-        { "path": "sortField", "message": "downstream requires field sortField" },
-        { "path": "sortType",  "message": "downstream requires field sortType" }
-    ]
-}
-```
-
-Fix:
-
-```bash
-node scripts/call.js call fund_etf -e get_etf_data -p market=HK -p dataType=list \
-    -p params='{"sortField":"changeRate","sortType":1}'
-```
-
-Known endpoints that need pass-through fields:
-
-| Call | Needs |
-|------|-------|
-| `fund_etf / get_etf_data` (HK, `dataType=list`) | `sortField`, `sortType` |
-| `stock_connect / get_cn_stock_connect_data` | `date`, `period` |
-| `quote_us_options / get_us_option_chain` | `root` |
-| `reference / get_trading_status` (HK, `statusType=session`) | `timeMode` (US / CN do not need it) |
+| Code | Meaning | Fix |
+| --- | --- | --- |
+| `INVALID_ARGUMENT` | Type or enum mismatch | Check the value against `describe_tool detail=params` |
+| `INVALID_SEMANTIC_INPUT` | A required discriminator is missing | Add the missing `*Type` field |
+| `INVALID_DOWNSTREAM_ARGS` | Parameter combination rejected downstream | Check field co-dependencies |
+| `UNSUPPORTED_ROUTE` | This market does not support the endpoint | Switch market or use the market-specific endpoint |
+| `DOWNSTREAM_NETWORK_ERROR` | Upstream data source unreachable | Retry; if persistent, keep the `requestId` and open an issue |

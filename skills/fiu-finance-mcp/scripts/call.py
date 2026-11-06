@@ -15,14 +15,14 @@ except ImportError:  # pragma: no cover
     requests = None
 
 
-DEFAULT_URL = os.environ.get("FIU_MCP_URL", "http://ai.szfiu.com/api/mcp/v2")
-PORTAL_FALLBACK = "http://ai.szfiu.com"
+DEFAULT_URL = os.environ.get("FIU_MCP_URL", "https://ai.szfiu.com/api/mcp/v2")
+PORTAL_FALLBACK = "https://ai.szfiu.com"
 PROTOCOL_VERSION = "2025-06-18"
 AUTH_ENV = "FIU_MCP_GATEWAY_AUTHORIZATION"
 IDENTIFIER_PARAM_KEYS = {
-    "id", "symbol", "code", "root", "ticker",
+    "symbol", "code", "root", "ticker",
     "securityCode", "stockCode", "warrantCode",
-    "isin", "sedol", "cik",
+    "isin", "sedol", "cik", "dateType",
 }
 
 # 出错时用来判断哪个 host 是"对外的"，其余 host:port 一律脱敏。
@@ -151,10 +151,17 @@ def main():
     parser.add_argument("items", nargs="*")
     parser.add_argument("--url", default=DEFAULT_URL)
     parser.add_argument("--raw", action="store_true")
-    parser.add_argument("--detail", choices=["summary", "params", "full"], default="summary")
+    parser.add_argument("--detail", choices=["summary", "params"], default="summary")
+    parser.add_argument("--page", type=int, default=1)
+    parser.add_argument("--page-size", type=int, default=10)
+    parser.add_argument("--fields", help="Comma-separated endpoint parameter names to return")
     parser.add_argument("--endpoint", "-e")
     parser.add_argument("--param", "-p", action="append", default=[])
     args = parser.parse_args()
+    if args.page < 1:
+        parser.error("--page must be a positive integer")
+    if args.page_size < 1 or args.page_size > 20:
+        parser.error("--page-size must be between 1 and 20")
     ACTIVE_URL = args.url
 
     client = McpHttpClient(args.url)
@@ -170,6 +177,9 @@ def main():
             "arguments": {
                 "toolNames": parse_tool_names(args.items[0]),
                 "detail": args.detail,
+                "page": args.page,
+                "pageSize": args.page_size,
+                **({"fields": [field.strip() for field in args.fields.split(",") if field.strip()]} if args.fields else {}),
             },
         })
     elif args.command == "call":
@@ -178,7 +188,7 @@ def main():
         if args.endpoint:
             tool_args = {
                 "endpoint": args.endpoint,
-                "params": parse_param_pairs(args.param),
+                "params": parse_param_pairs(args.param, args.endpoint),
             }
         elif len(args.items) >= 2:
             tool_args = parse_json_arg(" ".join(args.items[1:]), "tool arguments")
@@ -214,7 +224,7 @@ def parse_tool_names(value):
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def parse_param_pairs(param_pairs):
+def parse_param_pairs(param_pairs, endpoint=None):
     params = {}
     for pair in param_pairs:
         if not pair or "=" not in pair:
@@ -224,11 +234,11 @@ def parse_param_pairs(param_pairs):
         value = value.strip()
         if not key:
             raise RuntimeError(f"Invalid --param value: {pair}. Key is empty.")
-        params[key] = parse_param_value(key, value)
+        params[key] = parse_param_value(key, value, endpoint)
     return params
 
 
-def parse_param_value(key, value):
+def parse_param_value(key, value, endpoint=None):
     if key == "symbols":
         if value.startswith("["):
             return parse_json_arg(value, "symbols param")
@@ -239,6 +249,8 @@ def parse_param_value(key, value):
         return False
     if value == "null":
         return None
+    if key == "id" and endpoint in {"news_get", "news_related"}:
+        return value
     if key in IDENTIFIER_PARAM_KEYS:
         return value
     try:

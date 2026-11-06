@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
-const DEFAULT_URL = process.env.FIU_MCP_URL || "http://ai.szfiu.com/api/mcp/v2";
-const PORTAL_FALLBACK = "http://ai.szfiu.com";
+const DEFAULT_URL = process.env.FIU_MCP_URL || "https://ai.szfiu.com/api/mcp/v2";
+const PORTAL_FALLBACK = "https://ai.szfiu.com";
 const PROTOCOL_VERSION = "2025-06-18";
 const AUTH_ENV = "FIU_MCP_GATEWAY_AUTHORIZATION";
 const IDENTIFIER_PARAM_KEYS = new Set([
-  "id",
   "symbol",
   "code",
   "root",
@@ -15,14 +14,15 @@ const IDENTIFIER_PARAM_KEYS = new Set([
   "warrantCode",
   "isin",
   "sedol",
-  "cik"
+  "cik",
+  "dateType"
 ]);
 
 // 出错时用来判断哪个 host 是"对外的"，其余 host:port 一律脱敏。
 let activeUrl = DEFAULT_URL;
 
 async function main() {
-  const { command, args, url, raw, endpoint, paramPairs, detail } = parseCli(process.argv.slice(2));
+  const { command, args, url, raw, endpoint, paramPairs, detail, page, pageSize, fields } = parseCli(process.argv.slice(2));
   activeUrl = url;
 
   if (command === "help" || !command) {
@@ -42,7 +42,7 @@ async function main() {
       method: "tools/call",
       params: {
         name: "describe_tool",
-        arguments: { toolNames, detail }
+        arguments: { toolNames, detail, page, pageSize, ...(fields ? { fields } : {}) }
       }
     };
   } else if (command === "call") {
@@ -54,7 +54,7 @@ async function main() {
     if (endpoint) {
       toolArgs = {
         endpoint,
-        params: parseParamPairs(paramPairs)
+        params: parseParamPairs(paramPairs, endpoint)
       };
     } else if (args[1]) {
       toolArgs = parseJsonArg(args.slice(1).join(" "), "tool arguments");
@@ -303,6 +303,9 @@ function parseCli(argv) {
   let endpoint;
   let detail = "summary";
   let detailSpecified = false;
+  let page = 1;
+  let pageSize = 10;
+  let fields;
   const paramPairs = [];
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -316,6 +319,12 @@ function parseCli(argv) {
     } else if (value === "--detail") {
       detail = argv[++i];
       detailSpecified = true;
+    } else if (value === "--page") {
+      page = Number(argv[++i]);
+    } else if (value === "--page-size") {
+      pageSize = Number(argv[++i]);
+    } else if (value === "--fields") {
+      fields = argv[++i].split(",").map((item) => item.trim()).filter(Boolean);
     } else if (value === "--param" || value === "-p") {
       paramPairs.push(argv[++i]);
     } else {
@@ -323,8 +332,15 @@ function parseCli(argv) {
     }
   }
 
-  if (!["summary", "params", "full"].includes(detail)) {
-    throw new Error(`Invalid --detail value: ${detail}. Expected summary, params, or full.`);
+  if (!["summary", "params"].includes(detail)) {
+    throw new Error(`Invalid --detail value: ${detail}. Expected summary or params.`);
+  }
+
+  if (!Number.isInteger(page) || page < 1) {
+    throw new Error(`Invalid --page value: ${page}. Expected a positive integer.`);
+  }
+  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 20) {
+    throw new Error(`Invalid --page-size value: ${pageSize}. Expected an integer from 1 to 20.`);
   }
 
   if (detailSpecified && args[0] !== "describe") {
@@ -338,7 +354,10 @@ function parseCli(argv) {
     raw,
     endpoint,
     paramPairs,
-    detail
+    detail,
+    page,
+    pageSize,
+    fields
   };
 }
 
@@ -369,7 +388,7 @@ function parseJsonArg(value, label) {
   }
 }
 
-function parseParamPairs(paramPairs) {
+function parseParamPairs(paramPairs, endpoint) {
   const params = {};
   for (const pair of paramPairs) {
     if (!pair || !pair.includes("=")) {
@@ -381,12 +400,12 @@ function parseParamPairs(paramPairs) {
     if (!key) {
       throw new Error(`Invalid --param value: ${pair}. Key is empty.`);
     }
-    params[key] = parseParamValue(key, value);
+    params[key] = parseParamValue(key, value, endpoint);
   }
   return params;
 }
 
-function parseParamValue(key, value) {
+function parseParamValue(key, value, endpoint) {
   if (key === "symbols") {
     if (value.trim().startsWith("[")) {
       return parseJsonArg(value, "symbols param");
@@ -396,6 +415,7 @@ function parseParamValue(key, value) {
   if (value === "true") return true;
   if (value === "false") return false;
   if (value === "null") return null;
+  if (key === "id" && (endpoint === "news_get" || endpoint === "news_related")) return value;
   if (IDENTIFIER_PARAM_KEYS.has(key)) return value;
   if (/^-?\d+(\.\d+)?$/.test(value)) return Number(value);
   if (value.startsWith("[") || value.startsWith("{")) {
@@ -480,9 +500,9 @@ function unwrapToolResult(result) {
 
 function printHelp() {
   console.log(`Usage:
-  node scripts/call.js list [--url http://ai.szfiu.com/api/mcp/v2]
-  node scripts/call.js describe quote_kline,get_kline [--detail summary|params|full] [--url http://ai.szfiu.com/api/mcp/v2]
-  node scripts/call.js call <tool_name> '<arguments_json>' [--url http://ai.szfiu.com/api/mcp/v2]
+  node scripts/call.js list [--url https://ai.szfiu.com/api/mcp/v2]
+  node scripts/call.js describe quote_kline,get_kline [--detail summary|params] [--page 1] [--page-size 10] [--fields market,symbol] [--url https://ai.szfiu.com/api/mcp/v2]
+  node scripts/call.js call <tool_name> '<arguments_json>' [--url https://ai.szfiu.com/api/mcp/v2]
   node scripts/call.js call <tool_name> --endpoint <endpoint> --param key=value
 
 Examples:
@@ -493,8 +513,8 @@ Examples:
   node scripts/call.js describe quote_spot --detail params
 
 Environment:
-  FIU_MCP_URL=http://ai.szfiu.com/api/mcp/v2
-  FIU_MCP_GATEWAY_AUTHORIZATION=Bearer <gateway token from http://ai.szfiu.com>
+  FIU_MCP_URL=https://ai.szfiu.com/api/mcp/v2
+  FIU_MCP_GATEWAY_AUTHORIZATION=Bearer <gateway token from https://ai.szfiu.com>
 `);
 }
 

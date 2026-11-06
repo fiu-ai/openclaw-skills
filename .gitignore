@@ -1,38 +1,17 @@
-# Dependencies
-node_modules/
-
-# Environment
-.env
-.env.local
-.env.*.local
-
-# Logs
-*.log
-logs/
-
 # OS
 .DS_Store
 Thumbs.db
 
-# IDE
-.vscode/
+# Editors
 .idea/
+.vscode/
 *.swp
-*.swo
 
-# Build
-dist/
-build/
-
-# Temporary
-tmp/
-temp/
-*.tmp
-
-# Local documents (not for GitHub)
-PROJECT_SUMMARY.md
-
-# Secrets (keep example files, never commit actual tokens)
-*.pem
+# Local secrets — never commit an API key
+.env
+.env.local
 *.key
-!*.example
+
+# Logs and temp
+*.log
+tmp/

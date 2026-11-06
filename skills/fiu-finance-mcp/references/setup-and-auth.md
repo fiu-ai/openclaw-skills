@@ -4,12 +4,12 @@
 
 | 项 | 值 |
 | --- | --- |
-| 服务地址 | `http://ai.szfiu.com` |
-| MCP 入口 | `http://ai.szfiu.com/api/mcp/v2` |
+| 服务地址 | `https://ai.szfiu.com` |
+| MCP 入口 | `https://ai.szfiu.com/api/mcp/v2` |
 | 传输方式 | Streamable HTTP |
 | 请求头 | `Authorization: Bearer <API_KEY>` |
 
-API Key 在 `http://ai.szfiu.com` 申请。
+API Key 在 `https://ai.szfiu.com` 申请。
 
 ## MCP 客户端配置
 
@@ -18,7 +18,7 @@ API Key 在 `http://ai.szfiu.com` 申请。
   "mcpServers": {
     "fiu-finance": {
       "type": "streamableHttp",
-      "url": "http://ai.szfiu.com/api/mcp/v2",
+      "url": "https://ai.szfiu.com/api/mcp/v2",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
@@ -27,7 +27,31 @@ API Key 在 `http://ai.szfiu.com` 申请。
 }
 ```
 
-连接成功后客户端会看到 24 个工具：`describe_tool` 加 23 个业务模块工具。
+连接成功后客户端应看到 28 个工具：`describe_tool`、`search` 加 26 个业务模块工具；实际部署版本可能不同，以 `tools/list` 为准。
+
+## npm/npx stdio 适配器
+
+客户端不支持远程 Streamable HTTP 时，可使用产品手册中的本地适配器。需要 Node.js 20.18.1 或更高版本：
+
+```bash
+FIU_API_KEY=YOUR_API_KEY npx -y fiu-finance-mcp
+```
+
+客户端配置：
+
+```json
+{
+  "mcpServers": {
+    "fiu-finance": {
+      "command": "npx",
+      "args": ["-y", "fiu-finance-mcp"],
+      "env": { "FIU_API_KEY": "YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+`fiu-finance-mcp --api-key YOUR_API_KEY` 优先于 `FIU_API_KEY`，`--url` 可覆盖默认的 HTTPS 入口。
 
 ## 鉴权规则
 
@@ -46,7 +70,7 @@ export FIU_MCP_GATEWAY_AUTHORIZATION="Bearer YOUR_API_KEY"
 可选覆盖地址：
 
 ```bash
-export FIU_MCP_URL="http://ai.szfiu.com/api/mcp/v2"
+export FIU_MCP_URL="https://ai.szfiu.com/api/mcp/v2"
 ```
 
 Node.js：

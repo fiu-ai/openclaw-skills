@@ -1,46 +1,47 @@
-name: 💡 Feature Request
-description: Suggest a new feature or improvement
-title: "[Feature]: "
+name: Feature request / 功能建议
+description: Suggest a new skill, endpoint or capability / 建议新增技能、接口或能力
+title: "[Feature] "
 labels: ["enhancement"]
 body:
-  - type: markdown
+  - type: dropdown
+    id: kind
     attributes:
-      value: |
-        Thanks for suggesting a feature! Please describe your idea below.
+      label: Type / 类型
+      options:
+        - New skill / 新增技能
+        - New market or data coverage / 新增市场或数据覆盖
+        - Improve an existing skill / 改进现有技能
+        - Documentation / 文档
+        - Other / 其他
+    validations:
+      required: true
+
   - type: textarea
     id: problem
     attributes:
-      label: Problem Statement
-      description: Is your feature request related to a problem? Please describe.
-      placeholder: I'm always frustrated when...
+      label: Problem / 要解决的问题
+      description: What can you not do today?
+      placeholder: I want to ask about ... but no toolset covers it.
     validations:
       required: true
+
   - type: textarea
-    id: solution
+    id: proposal
     attributes:
-      label: Proposed Solution
-      description: Describe the solution you'd like.
-      placeholder: It would be great if...
+      label: Proposal / 建议方案
     validations:
       required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example questions / 示例问题
+      description: What would users ask that this should answer?
+      placeholder: |
+        - ...
+        - ...
+
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives Considered
-      description: Describe any alternative solutions you've considered.
-  - type: dropdown
-    id: priority
-    attributes:
-      label: Priority
-      description: How important is this feature to you?
-      options:
-        - Nice to have
-        - Important
-        - Critical
-    validations:
-      required: true
-  - type: textarea
-    id: additional
-    attributes:
-      label: Additional Context
-      description: Add any other context, mockups, or references here.
+      label: Alternatives considered / 其他方案

@@ -1,205 +1,320 @@
-# FIU Finance MCP 使用指南
+[English](USAGE_EN.md) | [中文](USAGE.md)
 
-面向 FIU MCP 网关 `http://ai.szfiu.com/api/mcp/v2` 的技能 `fiu-finance-mcp`。
+# 使用指南
 
 ## 快速开始
 
-### 1. 安装技能
+### 1. 申请 API Key
+
+打开 https://ai.szfiu.com 申请，得到一串 Key。
+
+### 2. 安装技能
 
 ```bash
-git clone git@github.com:fiu-ai/openclaw-skills.git
+git clone https://github.com/fiu-ai/openclaw-skills.git
 cd openclaw-skills
 ./install.sh
 ```
 
-或者只装这一个技能：
+技能默认装到 `~/.openclaw/skills/`，可用 `OPENCLAW_SKILLS_DIR` 覆盖：
 
 ```bash
-./skills/fiu-finance-mcp/install.sh
-# 或
-cp -r skills/fiu-finance-mcp ~/.openclaw/skills/
+OPENCLAW_SKILLS_DIR=/opt/skills ./install.sh
 ```
 
-### 2. 配置 API Key
+如果客户端只支持本地 stdio，可使用产品手册中的 npm/npx 适配器（Node.js 20.18.1+）：
 
-在 [http://ai.szfiu.com](http://ai.szfiu.com) 申请，然后写进 `~/.zshrc` 或 `~/.bashrc`：
+```bash
+FIU_API_KEY=YOUR_API_KEY npx -y fiu-finance-mcp
+```
+
+客户端配置使用 `command: "npx"`、`args: ["-y", "fiu-finance-mcp"]` 和 `env.FIU_API_KEY`。`--api-key` 可覆盖环境变量，`--url` 可覆盖默认 HTTPS 地址。
+
+### 3. 配置凭据
 
 ```bash
 export FIU_MCP_GATEWAY_AUTHORIZATION="Bearer YOUR_API_KEY"
-# 可选：覆盖端点
-# export FIU_MCP_URL="http://ai.szfiu.com/api/mcp/v2"
 ```
 
-### 3. 验证
+写进 `~/.bashrc` 或 `~/.zshrc` 可以长期生效。
+
+### 4. 验证
 
 ```bash
 ./test.sh
 ```
 
-五步自检：`tools/list`、`describe_tool`、港股 / 美股 / A 股行情。全通过输出 `✅ 测试完成，全部通过`。
+全部 `[PASS]` 说明连通、鉴权、工具列表都正常。
 
-在 OpenClaw 中输入 `/` 查看技能列表，应该能看到 `fiu-finance-mcp`。
+---
 
 ## 使用方式
 
-### 在 OpenClaw 中使用
+### 方式一：自然语言（推荐）
 
-```
-查询腾讯控股的实时行情
-显示 AAPL 的小时 K 线
-贵州茅台今天的资金流向
-美股现在是不是开盘时段
-本周港股新上市的新股有哪些
+技能装好、Key 配好之后，直接问：
+
+```text
+腾讯控股现在多少钱？
+比较一下 AAPL 和 MSFT 最近一年的走势。
+贵州茅台最近三年的营业收入和净利润。
+本周港股有哪些新股在招股？中签率怎么样？
+今天港股哪些股票涨得最多？
+南向资金今天净流入多少？
 ```
 
-### 使用命令行
+模型会按技能里的选路表挑工具集，自己补必填参数。
+
+### 方式二：在客户端配置 MCP 服务
+
+不装技能，直接让客户端连 MCP 服务也可以：
+
+```json
+{
+  "mcpServers": {
+    "fiu-finance": {
+      "type": "streamableHttp",
+      "url": "https://ai.szfiu.com/api/mcp/v2",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Claude Code 一条命令即可：
+
+```bash
+claude mcp add --transport http fiu-finance https://ai.szfiu.com/api/mcp/v2 \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 方式三：命令行脚本
 
 ```bash
 cd ~/.openclaw/skills/fiu-finance-mcp
 
+# 列出全部工具
 node scripts/call.js list
-node scripts/call.js describe quote_spot,quote_kline
-node scripts/call.js call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
+
+# 查工具集/endpoint 说明
+node scripts/call.js describe quote_kline,get_kline
+
+# 调用
+node scripts/call.js call quote_spot --endpoint get_quote \
+  --param market=HK --param assetType=stock --param symbols=00700.hk
 ```
 
 Python 版参数完全一致：
 
 ```bash
-python scripts/call.py call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
+python scripts/call.py call f10_financials --endpoint get_financial_statement \
+  --param market=CN --param symbol=600519.sh --param statementType=balance --param reportType=12
 ```
 
-更多可复制的示例见 [README_CN.md 的「工具调用速查」](README_CN.md#工具调用速查)。
+参数较多时，直接把整个 arguments 对象作为位置参数传：
 
-## 调用约定
+```bash
+node scripts/call.js call market_ranking \
+  '{"endpoint":"get_hk_ranking","params":{"rankType":"stock","sortField":"changeRate","sortType":1,"pageSize":10}}'
+```
 
-网关是 Streamable HTTP + JSON-RPC 2.0，请求头带 `Authorization: Bearer <API_KEY>`。
-`call.js` 已经封装了 `initialize` → `notifications/initialized` → `tools/call` 的握手和 SSE 解析，
-一般不需要自己拼请求。
+Windows PowerShell 下引号转义麻烦，建议一律用 `--endpoint` + `--param` 形式。
 
-每个业务工具都是**工具集**，只接受两个参数：
+---
+
+## MCP 协议说明
+
+服务走 **MCP Streamable HTTP**，JSON-RPC 2.0 over HTTP POST。
+
+**地址**：`https://ai.szfiu.com/api/mcp/v2`
+**鉴权**：请求头 `Authorization: Bearer YOUR_API_KEY`
+
+### 握手
+
+```bash
+curl -s https://ai.szfiu.com/api/mcp/v2 \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2025-06-18",
+      "capabilities": {},
+      "clientInfo": { "name": "curl", "version": "1.0" }
+    }
+  }'
+```
+
+响应头会带回 `Mcp-Session-Id`，后续请求需带上。
+
+### 列出工具
+
+```json
+{ "jsonrpc": "2.0", "id": 2, "method": "tools/list" }
+```
+
+### 调用工具
+
+大多数业务工具集收两个参数：`endpoint` 和 `params`。`market_overview`、`market_flow`、`market_position_cost`、`shareholding_institution`、`macro_economics` 和 `company_announcements` 是扁平工具，业务字段直接放在 `arguments`。
 
 ```json
 {
-  "endpoint": "get_quote",
-  "params": { "market": "HK", "assetType": "stock", "symbols": ["00700.hk"] }
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "quote_spot",
+    "arguments": {
+      "endpoint": "get_quote",
+      "params": {
+        "market": "HK",
+        "assetType": "stock",
+        "symbols": ["00700.hk", "09988.hk"]
+      }
+    }
+  }
 }
 ```
 
-对应到 CLI：
+### 查参数
 
-```bash
-node scripts/call.js call quote_spot -e get_quote -p market=HK -p assetType=stock -p symbols=00700.hk
-# 等价于
-node scripts/call.js call quote_spot '{"endpoint":"get_quote","params":{"market":"HK","assetType":"stock","symbols":["00700.hk"]}}'
+不确定某个 endpoint 要什么字段时，先问 `describe_tool`：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tools/call",
+  "params": {
+    "name": "describe_tool",
+    "arguments": {
+      "toolNames": ["f10_financials", "get_financial_statement"],
+      "detail": "params"
+    }
+  }
+}
 ```
 
-### `-p` 取值规则
+`toolNames` 一次最多 5 个；`detail` 支持 `summary` 和 `params`，默认使用 `summary`。
 
-| 写法 | 结果 |
-|------|------|
-| `-p symbols=00700.hk,AAPL.us` | `["00700.hk","AAPL.us"]`（`symbols` 总是拆成数组） |
-| `-p limit=30` | 数字 `30` |
-| `-p conceptFlag=Y` | 字符串 `"Y"` |
-| `-p timeMode=true` | 布尔 `true` |
-| `-p params='{"sortField":"changeRate"}'` | 对象，透传给下游 |
+---
 
-## 可用工具
+## 可用工具列表
 
-24 个工具、86 个 endpoint，覆盖港股、美股、A 股、日股，债券走 `GLOBAL` 路由。
-完整目录见 [README_CN.md 的「功能一览」](README_CN.md#功能一览)，权威来源始终是网关自己：
+28 个工具 = `describe_tool` + `search` + 26 个业务工具集，共 104 个 endpoint。
 
-```bash
-node scripts/call.js list
-node scripts/call.js call describe_tool '{"toolNames":["quote_spot"],"detail":"params"}'
-```
+| 工具集 | 覆盖市场 | 用途 |
+| --- | --- | --- |
+| `describe_tool` | — | 查工具集和 endpoint 的参数定义 |
+| `quote_spot` | CN HK JP US GLOBAL | 实时报价、证券搜索、静态资料 |
+| `quote_intraday` | CN HK JP US GLOBAL | 盘口、逐笔成交、分时走势 |
+| `quote_kline` | CN HK JP US GLOBAL | K线、历史快照、收益率序列 |
+| `quote_derivatives_hk` | HK | 窝轮、牛熊证 |
+| `quote_us_options` | US | 美股期权链、报价、希腊字母、排行 |
+| `market_overview` | CN HK JP US | 市场统计概览 |
+| `market_ranking` | CN HK JP US | 各市场使用 `get_hk_ranking`、`get_us_ranking`、`get_cn_ranking`、`get_jp_ranking` |
+| `market_flow` | CN HK JP US | 个股资金流向 |
+| `market_structure` | CN HK JP US | 指数、行业分类、市场微观结构 |
+| `market_position_cost` | HK US | 筹码分布、成本区间 |
+| `f10_profile` | CN HK US | 公司资料、管理层 |
+| `f10_financials` | CN HK US | 三大报表、财务指标 |
+| `f10_business_governance` | CN HK US | 业务分部、公司行动 |
+| `shareholding_structure` | CN HK US | 主要股东、十大股东、持股变动 |
+| `shareholding_institution` | US | 机构持仓（13F） |
+| `shareholding_fund_broker` | HK US | 券商持仓、沽空 |
+| `fund_data` | 全球基金 | 搜索、资料、净值、业绩、风险、完整持仓、配置、费率、排行与国家代码解析 |
+| `stock_connect` | CN HK | 沪深港通资金流、持股、排行 |
+| `ipo` | HK US | 新股日历、招股、基石、保荐、中签、资讯 |
+| `bond_basic` | GLOBAL | 债券搜索、资料、报价、盘口 |
+| `bond_analytics` | GLOBAL | 债券排行、走势、收益率、交易状态 |
+| `fiu_news` | CN HK JP US GLOBAL | 新闻搜索、个股新闻、最新新闻、详情、相关新闻和摘要素材 |
+| `financial_calendar` | Global | 财经日历搜索与事件详情 |
+| `macro_economics` | CN-focused | 精选宏观经济数据 |
+| `company_announcements` | HK US CN | 上市公司公告及附件/正文合并 |
+| `reference` | CN HK JP US GLOBAL | ISIN/SEDOL/CIK 码表、代码映射、交易日历 |
 
-`describe_tool` 分三档：
+完整 endpoint 与必填字段见 [docs/mcp-interfaces_CN.md](docs/mcp-interfaces_CN.md)。
 
-| detail | 用途 | 限制 |
-|--------|------|------|
-| `summary`（默认） | 选工具集、看市场覆盖 | 一次最多 5 个名字 |
-| `params` | 查字段名、必填项、枚举值 | 一次最多 5 个名字 |
-| `full` | 单个 endpoint 反复调不通时排障 | 一次 1 个 endpoint |
+---
 
 ## 常见问题
 
-### Q: 如何获取 API Key？
+**Q：模型看不到工具？**
+确认技能目录在 `~/.openclaw/skills/fiu-finance-mcp/`，`SKILL.md` 存在，然后重启客户端。走 MCP 配置的话确认客户端已重载配置。
 
-A: 访问 [http://ai.szfiu.com](http://ai.szfiu.com) 申请，配置到
-`FIU_MCP_GATEWAY_AUTHORIZATION="Bearer <API_KEY>"`。
+**Q：返回 `401 缺少认证头`？**
+请求没带 `Authorization`。检查 `FIU_MCP_GATEWAY_AUTHORIZATION` 是否已导出，或客户端 `headers` 配置是否写对。注意值里要包含 `Bearer ` 前缀。
 
-### Q: 报 `INVALID_ARGUMENT` / `INVALID_SEMANTIC_INPUT` 怎么办？
+**Q：返回 `401 无效的令牌`？**
+Key 不对或已失效，到 https://ai.szfiu.com 重新确认。
 
-A: 说明网关语义层校验没过，多半是漏了区分字段（`dataType`、`holdingType`、`ipoType`、
-`connectType`、`costType`、`statementType` 等）。用 `describe_tool` 的 `detail=params` 查必填项。
+**Q：返回 `INVALID_SEMANTIC_INPUT` 或 `INVALID_ARGUMENT`？**
+少了必填的类型判别字段，或枚举值写错。用 `describe_tool` 带 `detail: "params"` 查一遍该 endpoint。
 
-### Q: 报 `INVALID_DOWNSTREAM_ARGS` 怎么办？
+**Q：返回 `UNSUPPORTED_ROUTE`？**
+这个 `market` 不支持该 endpoint 或该参数组合。例如 `get_shareholders` 的 `topten` 走 A股(Zhcall提供)，港股要用 `major`。
 
-A: 语义层过了、下游还缺字段。错误体里的 `error.details.issues` 会逐条点名，例如：
+**Q：财务数据怎么只取年报？**
+在 `params` 里带 `reportType`。港股 `F`=年报、`I`=半年报；美股 `FY`=年报、`I1/I2`=半年期；A股(Zhcall提供) `12`=年报、`6`=中报。季度取值和其他分支以 `describe_tool` 返回为准。
 
-```
-sortField  下游 hk_sdk/post_v3_etf_list 需要字段 sortField
-period     下游 cn_sdk/post_v1_stockConnect_connectBalance 需要字段 period
-root       下游 us_options/post_opra_v1_chain_expiration 需要字段 root
-```
+**Q：返回空数组？**
+成功响应会包含 `code: 0` 和 `resultStatus`。当 `resultStatus=empty` 时查看 `emptyReason`：时间区间问题可扩大日期范围，筛选问题可调整标的或条件；这不是需要重试的服务故障。
 
-补进 `-p params='{...}'` 重试即可。
+完整排障见 [skills/fiu-finance-mcp/references/troubleshooting.md](skills/fiu-finance-mcp/references/troubleshooting.md)。
 
-### Q: 报 `UNSUPPORTED_ROUTE` 怎么办？
-
-A: 这个 endpoint 在该市场没有下游路由。换市场，或用 `describe_tool` 看它实际支持哪些市场 ——
-工具级别标注的市场是并集，单个 endpoint 可能更窄。
-
-### Q: 支持哪些市场？
-
-A: `HK`（港股）、`US`（美股）、`CN`（A 股沪深）、`JP`（日股）。债券类接口走 `GLOBAL`。
-
-### Q: 代码怎么写？
-
-A: 带完整后缀 —— `00700.hk`、`AAPL.us`、`600519.sh`、`000001.sz`、`6758.jp`；债券可传 ISIN。
-日期用 `YYYY-MM-DD`；分钟 K 线、逐笔、分时这类需要精确时刻的用 `YYYY-MM-DD HH:mm:ss`。
-
-### Q: 批量查询有上限吗？
-
-A: 批量行情、财务、持股、新闻类查询建议控制在约 5 个标的或 5 个指标以内；`get_security_profile`
-的 `symbols` 上限是 50 个。
+---
 
 ## 开发指南
 
-### 直接用 HTTP 调网关
+### 目录约定
 
-```bash
-curl -s -X POST "http://ai.szfiu.com/api/mcp/v2" \
-    -H "Authorization: Bearer $API_KEY" \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json, text/event-stream" \
-    -H "Mcp-Protocol-Version: 2025-06-18" \
-    -H "Mcp-Session-Id: $SESSION_ID" \
-    -d '{
-        "jsonrpc": "2.0",
-        "id": 1,
-        "method": "tools/call",
-        "params": {
-            "name": "quote_spot",
-            "arguments": {
-                "endpoint": "get_quote",
-                "params": {"market": "HK", "assetType": "stock", "symbols": ["00700.hk"]}
-            }
-        }
-    }'
+```
+skills/<skill-name>/
+├── SKILL.md            必需，英文技能定义（含 YAML frontmatter）
+├── SKILL_CN.md         中文版本
+├── skill.json          元数据：版本、依赖、环境变量
+├── install.sh          单技能安装脚本
+├── references/         按需加载的参考文档
+└── scripts/            可执行辅助脚本
 ```
 
-`SESSION_ID` 来自先前 `initialize` 请求响应头里的 `Mcp-Session-Id`，之后每个请求都要带上。
-响应是 SSE（CRLF 换行），取最后一条 `data:` 行再解析。这些细节 `call.js` 都处理好了，
-新写集成建议直接复用它。
+### SKILL.md 的写法
+
+- `description` 要写清**什么时候用**，模型靠它决定是否加载技能。
+- 正文保持精简，细节放 `references/`，用到再读。
+- 明确写出能力边界，让模型知道什么时候该停。
+
+### 本地调试
+
+```bash
+export FIU_MCP_GATEWAY_AUTHORIZATION="Bearer YOUR_API_KEY"
+./test.sh
+
+# 指向其他环境
+FIU_MCP_URL=https://your-gateway.example.com/api/mcp/v2 ./test.sh
+```
+
+### 提交前检查
+
+- [ ] `./test.sh` 全绿
+- [ ] `SKILL.md` 与 `SKILL_CN.md` 内容一致
+- [ ] `skill.json` 版本号已递增
+- [ ] 没有任何真实 Key 出现在文件里
+
+---
 
 ## 相关资源
 
-- [FIU MCP 官方站点](http://ai.szfiu.com)
-- [GitHub 仓库](https://github.com/fiu-ai/openclaw-skills)
-- [OpenClaw 文档](https://docs.openclaw.ai)
-- [JSON-RPC 2.0 规范](https://www.jsonrpc.org/specification)
+- MCP 服务仓库：https://github.com/fiu-ai/mcp-server
+- MCP 协议规范：https://modelcontextprotocol.io
+- 服务地址：https://ai.szfiu.com
 
 ## 技术支持
 
-如有问题，请提交 GitHub Issue 或联系 FIU 技术支持。
+- 问题反馈：https://github.com/fiu-ai/openclaw-skills/issues
+- 提 Issue 时请附上：客户端与版本、完整错误信息、调用的工具集和 endpoint。**不要贴 API Key。**

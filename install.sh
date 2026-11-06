@@ -1,38 +1,34 @@
-#!/bin/bash
-# FIU MCP Skills 安装脚本
-# 把 skills/ 下的技能安装到 OpenClaw
+#!/usr/bin/env bash
+# Install FIU skills into the local OpenClaw skills directory.
+set -euo pipefail
 
-set -e
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/skills"
+DEST_DIR="${OPENCLAW_SKILLS_DIR:-$HOME/.openclaw/skills}"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OPENCLAW_SKILLS_DIR="${OPENCLAW_SKILLS_DIR:-$HOME/.openclaw/skills}"
+echo "==> Installing FIU skills"
+echo "    from: $SRC_DIR"
+echo "    to:   $DEST_DIR"
 
-echo "🚀 FIU MCP Skills 安装程序"
-echo "=========================="
-echo ""
-
-if [ ! -d "$OPENCLAW_SKILLS_DIR" ]; then
-    echo "❌ 未找到 OpenClaw skills 目录：$OPENCLAW_SKILLS_DIR"
-    echo "请先安装 OpenClaw，或设置 OPENCLAW_SKILLS_DIR 指向正确路径"
-    exit 1
+if [ ! -d "$SRC_DIR" ]; then
+  echo "!! skills/ not found. Run this script from the repository root." >&2
+  exit 1
 fi
 
-echo "📦 复制 skills 到 $OPENCLAW_SKILLS_DIR..."
-cp -r "$SCRIPT_DIR/skills/"* "$OPENCLAW_SKILLS_DIR/"
+mkdir -p "$DEST_DIR"
 
-echo ""
-echo "✅ 安装完成！"
-echo ""
-echo "已安装的 skills:"
-ls -1 "$SCRIPT_DIR/skills" | sed 's/^/  - /'
-echo ""
-echo "验证方法："
-echo "1. 打开 OpenClaw 聊天"
-echo "2. 输入 / 查看可用技能列表"
-echo "3. 应该能看到 fiu-finance-mcp 技能"
-echo ""
-echo "使用前请设置环境变量（在 http://ai.szfiu.com 申请 API Key）："
-echo "  export FIU_MCP_GATEWAY_AUTHORIZATION=\"Bearer YOUR_API_KEY\""
-echo ""
-echo "连通性自检：./test.sh"
-echo ""
+for skill in "$SRC_DIR"/*/; do
+  name="$(basename "$skill")"
+  rm -rf "${DEST_DIR:?}/$name"
+  cp -r "$skill" "$DEST_DIR/"
+  echo "    installed: $name"
+done
+
+echo
+echo "==> Done"
+echo
+echo "Next: export your API key so the helper scripts can authenticate."
+echo
+echo "    export FIU_MCP_GATEWAY_AUTHORIZATION=\"Bearer YOUR_API_KEY\""
+echo
+echo "Get a key at https://ai.szfiu.com"
+echo "Then verify with: ./test.sh"

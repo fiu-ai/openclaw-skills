@@ -1,67 +1,79 @@
-name: 🐛 Bug Report
-description: Report a bug or unexpected behavior
-title: "[Bug]: "
+name: Bug report / 问题反馈
+description: Report a problem with a skill / 反馈技能使用中的问题
+title: "[Bug] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report a bug! Please fill out the following information.
+        Thanks for the report. Please do **not** paste your API key anywhere in this issue.
+        感谢反馈。请**不要**在 Issue 中粘贴你的 API Key。
+
   - type: input
-    id: version
+    id: skill
     attributes:
-      label: Version
-      description: What version are you using?
-      placeholder: e.g., v1.0.0, latest
+      label: Skill / 技能
+      placeholder: fiu-finance-mcp
     validations:
       required: true
-  - type: textarea
-    id: description
+
+  - type: input
+    id: client
     attributes:
-      label: Bug Description
-      description: A clear and concise description of what the bug is.
-      placeholder: Describe what happened...
+      label: Client and version / 客户端与版本
+      placeholder: Claude Code 2.x / Claude Desktop / Cursor / ...
     validations:
       required: true
+
   - type: textarea
-    id: reproduction
+    id: what-happened
     attributes:
-      label: Steps to Reproduce
-      description: How can we reproduce this issue?
+      label: What happened / 问题描述
+      description: What did you ask, and what came back?
       placeholder: |
-        1. Go to '...'
-        2. Run '...'
-        3. See error
+        Asked: ...
+        Toolset / endpoint: quote_spot / get_quote
+        Result: ...
     validations:
       required: true
+
   - type: textarea
     id: expected
     attributes:
-      label: Expected Behavior
-      description: What did you expect to happen?
+      label: Expected / 期望结果
     validations:
       required: true
+
   - type: textarea
-    id: logs
+    id: reproduce
     attributes:
-      label: Relevant Logs / Screenshots
-      description: Paste any error messages, logs, or screenshots.
+      label: Steps to reproduce / 复现步骤
+      description: A command line reproduction is ideal.
+      placeholder: |
+        node scripts/call.js call quote_spot --endpoint get_quote --param market=HK --param assetType=stock --param symbols=00700.hk
       render: shell
-  - type: dropdown
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error output / 错误信息
+      description: Full error message. Redact the API key.
+      render: shell
+
+  - type: textarea
     id: environment
     attributes:
-      label: Environment
-      description: What environment are you using?
-      options:
-        - Linux
-        - macOS
-        - Windows
-        - Docker
-        - Other
-    validations:
-      required: true
-  - type: textarea
-    id: additional
+      label: Environment / 运行环境
+      placeholder: |
+        OS: macOS 15 / Windows 11 / Ubuntu 24.04
+        Node: v22.x
+        Install method: install.sh / ClawHub / manual copy
+
+  - type: checkboxes
+    id: checks
     attributes:
-      label: Additional Context
-      description: Add any other context about the problem here.
+      label: Checklist / 检查项
+      options:
+        - label: I ran `./test.sh` and included the result above / 已运行 `./test.sh` 并附上结果
+        - label: No API key appears in this issue / 本 Issue 中不含 API Key
+          required: true

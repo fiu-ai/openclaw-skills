@@ -1,104 +1,111 @@
 # 排障指南
 
-连接失败、工具不可见、401、参数校验失败、超时、模型没有调用 MCP 时读取本文件。
+当出现连接失败、工具不可见、401、400、超时、调用很慢、模型没有调用 MCP 时读取本文件。
 
 ## 当前会话看不到 MCP 工具
 
-含义：客户端没有连上，或工具未注册到当前会话。
+表现：
+
+- 用户提问金融数据，模型没有可调用的 `describe_tool` 或业务模块工具。
+- 模型准备改用网页搜索。
+
+处理：
+
+1. 停止业务查询，不要网页兜底。
+2. 让用户确认 MCP 客户端配置的地址是 `https://ai.szfiu.com/api/mcp/v2`。
+3. 让用户先访问 `https://ai.szfiu.com` 完成授权，并重新开启一个干净会话后再测。
+
+## `netERR_CONNECTION_REFUSED`
+
+含义：客户端访问的 MCP HTTP/SSE 地址没有服务在监听，或 URL/网络配置不一致。
 
 检查：
 
-- 客户端里 FIU MCP 是否处于启用状态。
-- URL 是否为 `http://ai.szfiu.com/api/mcp/v2`。
-- 改完配置后是否重启了客户端。
-- 连接正常时应看到 24 个工具：`describe_tool` 加 23 个业务模块工具。
+- MCP 客户端 URL 是否为 `https://ai.szfiu.com/api/mcp/v2`。
+- 本机是否能访问 `https://ai.szfiu.com`。
+- 不要在本机客户端里填写服务器内部地址（内网 IP、`localhost`、容器服务名）。
+- 如使用脚本，确认 `FIU_MCP_URL` 没有覆盖成错误地址。
 
-工具不可见时，应提示用户检查连接，不要用网页搜索代替数据查询。
+## 401 Unauthorized
 
-## 连接被拒绝
-
-含义：目标地址没有服务在监听，或 URL 写错。
+含义：请求到达了上游 Gateway，但当前会话或请求头未通过授权。
 
 检查：
 
-- 本机能否访问 `http://ai.szfiu.com`。
-- 不要在客户端里填写服务器内网地址。
-- 使用脚本时确认 `FIU_MCP_URL` 没有被覆盖成错误地址。
+- 是否先访问 `https://ai.szfiu.com` 完成授权。
+- MCP 客户端配置的 URL 是否为 `https://ai.szfiu.com/api/mcp/v2`。
+- 如使用脚本，是否设置了上游要求的 `FIU_MCP_GATEWAY_AUTHORIZATION`。
+- 不要把 Token 放入业务工具参数。
 
-## 401 缺少认证头
+## `MCP_AUTH_REQUIRED` / 502、503、504
 
-含义：请求到达网关，但没有携带 `Authorization`。
+表现：脚本返回
 
-处理：
+```json
+{
+  "error": "McpAuthRequiredError",
+  "code": "MCP_AUTH_REQUIRED",
+  "portal": "https://ai.szfiu.com"
+}
+```
 
-- 客户端配置里加上 `"headers": { "Authorization": "Bearer YOUR_API_KEY" }`。
-- 使用脚本时导出 `FIU_MCP_GATEWAY_AUTHORIZATION="Bearer YOUR_API_KEY"`。
-- 不要把 Key 放进业务参数。
-
-## 401 无效的令牌
-
-含义：请求带了 Key，但网关不认。
-
-处理：
-
-- 确认值的形式是 `Bearer ` 加 Key，中间一个空格。
-- 确认 Key 没有过期，必要时在 `http://ai.szfiu.com` 重新申请。
-- 确认没有多余的引号、换行或空白字符。
-
-## INVALID_ARGUMENT / INVALID_SEMANTIC_INPUT
-
-含义：网关语义层校验没过，通常是必填字段缺失或枚举值不对。
+含义：上游网关没有把这次请求送到位。最常见的原因是未完成授权或未配置 JWT。
 
 处理：
 
-- 看 `details.issues`，里面按字段列出了原因。
-- 调用 `describe_tool`，`detail` 用 `params`，拿到该 endpoint 的必填字段、类型和合法枚举。
-- 常见原因：漏传 `market`，或漏传类型判别字段（`ipoType`、`connectType`、`dataType`、`holdingType`、`actionType`、`referenceType`、`optionType`）。
+1. 浏览器打开 `https://ai.szfiu.com` 完成登录授权，拿到 JWT。
+2. 设置 `FIU_MCP_GATEWAY_AUTHORIZATION=Bearer <token>`。
+3. 确认 `FIU_MCP_URL` / MCP 客户端地址是 `https://ai.szfiu.com/api/mcp/v2`。
+4. 授权已完成仍然失败时，联系服务方处理，不要自行改成内网地址。
 
-## INVALID_DOWNSTREAM_ARGS
+说明：脚本会把上游错误正文里的服务器内部地址替换成 `[internal]`，所以这里看不到具体主机和端口，这是预期行为，不是信息丢失。
 
-含义：语义层过了，但下游接口还需要更具体的字段。
+## 400 Bad Request
 
-处理：
-
-- 对这一个 endpoint 调用 `describe_tool`，`detail` 用 `full`，展开下游请求结构。
-- 按展开结果补齐字段后重试。
-
-## UNSUPPORTED_ROUTE
-
-含义：该 endpoint 不支持当前的 `market` / `assetType` 组合。
+含义：请求到达下游，但参数不符合下游接口要求。
 
 处理：
 
-- 看 `details.hints`，里面列出了只差一个条件就能命中的组合。
-- 对照 `references/toolsets.md` 确认该能力在目标市场是否覆盖。
+- 调用 `describe_tool` 查看 endpoint 的参数、枚举、日期格式和能力边界。
+- 检查 `market`、`assetType`、`symbol`/`symbols`、`period`、`date` 等核心字段。
+- 同一字段在不同接口里的格式可能不同，以具体 endpoint 描述为准。
 
-## DOWNSTREAM_NETWORK_ERROR
+## 下游超时或首次调用失败
 
-含义：网关连不上下游数据服务，通常是网络或部署问题，不是参数问题。
+表现：
+
+- 返回 `This operation was aborted`。
+- `elapsedMs` 接近 `timeoutMs`。
+- 第一次失败，多调几次后成功。
+
+可能原因：
+
+- 下游 MCP Server 冷启动或连接预热慢。
+- SSE/HTTP 连接初始化耗时。
+- 下游接口本身响应慢。
+- 查询参数导致返回数据量过大。
 
 处理：
 
-- 记下错误里的 `requestId`，反馈给维护方。
-- 不要反复重试同一个调用。
-
-## 数据为空但没有报错
-
-含义：参数合法，但该市场/该标的/该周期确实没有数据。
-
-检查：
-
-- 代码后缀是否正确：`00700.hk`、`AAPL.us`、`600519.sh`、`000001.sz`、`6758.jp`。
-- 该能力在目标市场是否覆盖，见 `references/toolsets.md`。
-- 财务查询是否加了不存在的 `reportType`：港股库中没有 `Q2`；A股(中华通)用数字不是字母；美股不支持按报告期筛选。
-- 日期范围是否落在非交易日或未来。
+- 优先缩小查询范围，例如减少 `symbols`、降低 `limit`、加分页。
+- 首次启动后先调用轻量工具做预热，例如工具列表或单只股票基础行情。
+- 查看服务日志中的 `requestId`、server、tool、elapsedMs、timeoutMs。
+- 如果经常接近超时，应提高超时时间或让下游服务做连接复用/缓存。
 
 ## 模型反复调用元工具
 
-含义：模型在 `describe_tool` 和 `list` 之间打转，没有落到业务调用。
+表现：模型一直调用 `describe_tool`，没有进入业务工具。
 
 处理：
 
-- 明确告诉模型用哪个工具集和哪个 endpoint。
-- `describe_tool` 一次最多 5 个名称，`detail=full` 一次只能查 1 个 endpoint，超出会被拒绝。
-- 当前默认直接暴露业务模块工具，不存在「先启用工具集」这一步。
+- 一旦确定工具集和 endpoint，立即调用业务工具。
+- `describe_tool` 只用于确认参数，不用于实际查询数据。
+- 对简单问题，例如“查腾讯行情”，应直接调用 `quote_spot` 并选择行情 endpoint，不需要启用工具集。
+
+## 数据为空
+
+处理：
+
+- 说明接口返回为空，不要编造。
+- 检查市场、代码后缀、日期范围、分页参数。
+- 对“最新”“今天”等问题，明确当前日期，并说明数据是否可能因非交易时段、休市或下游延迟而为空。

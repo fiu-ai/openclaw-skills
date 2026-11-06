@@ -33,12 +33,12 @@
 { "endpoint": "get_market_statistics", "params": { "market": "HK" } }
 
 // market_ranking —— 港股涨幅榜前 10
-{ "endpoint": "get_rankings", "params": { "market": "HK", "rankType": "stock", "sortField": "changeRate", "sortType": 1, "pageSize": 10 } }
+{ "endpoint": "get_hk_ranking", "params": { "rankType": "stock", "sortField": "changeRate", "sortType": 1, "pageSize": 10 } }
 
-// market_flow —— A股(中华通)当前资金流
+// market_flow —— A股(Zhcall提供)当前资金流
 { "endpoint": "get_capital_flow", "params": { "market": "CN", "flowType": "current", "symbol": "600519.sh" } }
 
-// market_structure —— A股(中华通)行业列表
+// market_structure —— A股(Zhcall提供)行业列表
 { "endpoint": "get_industry_data", "params": { "market": "CN", "industryType": "list" } }
 
 // market_position_cost —— 指定价位获利比例
@@ -56,7 +56,7 @@
 // f10_financials —— 港股年报利润表
 { "endpoint": "get_financial_statement", "params": { "market": "HK", "symbol": "00700.hk", "statementType": "income", "reportType": "F" } }
 
-// f10_financials —— A股(中华通)年度资产负债表
+// f10_financials —— A股(Zhcall提供)年度资产负债表
 { "endpoint": "get_financial_statement", "params": { "market": "CN", "symbol": "600519.sh", "statementType": "balance", "reportType": 12 } }
 
 // f10_financials —— 财务指标
@@ -84,9 +84,10 @@
 ## 基金、IPO、债券、参考数据
 
 ```json
-// fund_etf
-{ "endpoint": "get_etf_data",  "params": { "market": "HK", "dataType": "issuer" } }
-{ "endpoint": "get_fund_data", "params": { "market": "HK", "symbol": "02800.hk", "dataType": "value" } }
+// fund_data
+{ "endpoint": "search_funds", "params": { "query": "DRAM", "page": 0, "page_size": 10 } }
+{ "endpoint": "get_fund_holdings", "params": { "fund_id": "FS0000KKSG", "operation": "default", "page": 0, "page_size": 200 } }
+{ "endpoint": "get_country_code", "params": { "countryName": "美国" } }
 
 // ipo —— 待上市新股
 { "endpoint": "get_hk_ipo_list", "params": { "ipoType": "to_be_listed" } }
@@ -106,10 +107,25 @@
 { "endpoint": "news_latest",          "params": { "market": "HK", "limit": 5 } }
 { "endpoint": "news_search",          "params": { "market": "CN", "query": "新能源", "limit": 10 } }
 { "endpoint": "news_by_symbol",       "params": { "market": "HK", "symbol": "00700.hk", "limit": 10 } }
-{ "endpoint": "news_semantic_search", "params": { "market": "US", "query": "AI chip demand", "limit": 10 } }
+{ "endpoint": "news_search",          "params": { "query": "AI chip demand", "limit": 10 } }
+{ "endpoint": "news_digest",          "params": { "symbol": "AAPL.us", "limit": 10 } }
 ```
 
-`news_search` 只匹配标题、摘要和关键词，不搜正文；描述性问题用 `news_semantic_search`。
+`news_search` 是语义检索；`news_digest` 返回适合摘要的 `content_preview`，不返回完整正文。
+
+## 财经日历、宏观数据与公司公告
+
+```json
+{ "endpoint": "search_financial_calendar", "params": { "keyword": "非农", "date": "2026-10-09" } }
+{ "endpoint": "get_financial_event_detail", "params": { "id": "<calendar-event-id>" } }
+```
+
+`macro_economics` 和 `company_announcements` 是扁平工具，业务字段直接放在 `arguments`：
+
+```json
+{ "endpoint": "get_macro_overview", "titleId": 10 }
+{ "endpoint": "get_company_announcements", "market": "HK", "symbols": ["00700.hk"] }
+```
 
 ## 查参数
 
@@ -128,7 +144,7 @@
 贵州茅台最近三年的营业收入和净利润趋势。
 苹果的机构持股统计，最近一个季度有没有明显增减？
 00700.hk 的十大股东和最近的持股变动。
-A股今天哪些行业资金净流入最多？
+A股(Zhcall提供)今天哪些行业资金净流入最多？
 最近 24 小时港股有什么重要新闻？
 2800.hk 的最新净值和资产规模。
 00700.hk 的 ISIN 是多少？
